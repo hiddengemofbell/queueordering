@@ -71,33 +71,6 @@
       fill: var(--color-ready);
     }
 
-    .header-controls {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-
-    .sound-toggle {
-      background: #1f2937;
-      border: 1px solid #374151;
-      color: #9ca3af;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-
-    .sound-toggle.active {
-      color: #34d399;
-      border-color: #059669;
-      background: rgba(5, 150, 105, 0.15);
-    }
-
     .live-clock {
       font-size: 1.4rem;
       color: #f3f4f6;
@@ -244,12 +217,7 @@
       NOW SERVING
     </div>
     
-    <div class="header-controls">
-      <button class="sound-toggle active" id="soundBtn" onclick="toggleSound()">
-        <span id="soundIcon">🔔</span> Sound Chime: ON
-      </button>
-      <div class="live-clock" id="liveClock">--:--:--</div>
-    </div>
+    <div class="live-clock" id="liveClock">--:--:--</div>
   </header>
 
   <!-- Main Board Display -->

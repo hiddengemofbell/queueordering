@@ -44,6 +44,19 @@
       user-select: none;
     }
 
+    /* Header & Navigation Bar */
+    header {
+      background: var(--panel-bg);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
     .header-left {
       display: flex;
       align-items: center;
@@ -109,27 +122,6 @@
       display: flex;
       align-items: center;
       gap: 16px;
-    }
-
-    .popout-btn {
-      background: rgba(59, 130, 246, 0.15);
-      border: 1px solid rgba(59, 130, 246, 0.4);
-      color: #60a5fa;
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-
-    .popout-btn:hover {
-      background: rgba(59, 130, 246, 0.3);
-      color: #fff;
     }
 
     .sound-btn {
@@ -428,6 +420,143 @@
     .ready-card .card-action-hint { color: #ef4444; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); }
     .ready-card:hover .card-action-hint { background: rgba(239, 68, 68, 0.25); }
 
+    /* HISTORY LOG PANEL STYLES */
+    .history-panel {
+      grid-column: 1 / -1;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 10px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+    }
+
+    .history-title {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      flex-wrap: wrap;
+    }
+
+    .history-filters {
+      display: flex;
+      gap: 6px;
+      background: #0f172a;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .hist-filter-btn {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .hist-filter-btn.active {
+      background: #334155;
+      color: #fff;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .hist-act-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .hist-act-btn.export-btn {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+    .hist-act-btn.export-btn:hover { background: rgba(16, 185, 129, 0.3); }
+
+    .hist-act-btn.clear-btn {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+    .hist-act-btn.clear-btn:hover { background: rgba(239, 68, 68, 0.25); }
+
+    .history-table-wrapper {
+      max-height: 320px;
+      overflow-y: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    .history-table th {
+      background: #0f172a;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .history-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: var(--text-main);
+    }
+
+    .history-table tr:last-child td { border-bottom: none; }
+
+    .hist-num { font-weight: 800; font-size: 1.1rem; letter-spacing: 0.5px; }
+
+    .hist-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-prepared { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-ready { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-done { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+
+    .empty-hist { text-align: center; color: #64748b; padding: 30px 0 !important; }
+
     /* 2. CUSTOMER TV VIEW STYLES */
     .customer-container {
       flex: 1;
@@ -610,6 +739,45 @@
           </div>
         </div>
       </div>
+
+      <!-- 3. ORDER HISTORY LOG PANEL -->
+      <div class="history-panel">
+        <div class="history-header">
+          <div class="history-title">
+            <span>📜 Order History Log</span>
+            <div class="history-filters">
+              <button class="hist-filter-btn active" id="hist-filter-all" onclick="filterHistory('all')">All (<span id="hist-cnt-all">0</span>)</button>
+              <button class="hist-filter-btn" id="hist-filter-prepared" onclick="filterHistory('prepared')">⏳ Prepared (<span id="hist-cnt-prepared">0</span>)</button>
+              <button class="hist-filter-btn" id="hist-filter-ready" onclick="filterHistory('ready')">🔔 Ready (<span id="hist-cnt-ready">0</span>)</button>
+              <button class="hist-filter-btn" id="hist-filter-done" onclick="filterHistory('done')">✅ Processed Done (<span id="hist-cnt-done">0</span>)</button>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="hist-act-btn export-btn" onclick="exportHistoryCSV()">📥 Export CSV</button>
+            <button class="hist-act-btn clear-btn" onclick="clearHistoryLog()">🗑️ Clear Log</button>
+          </div>
+        </div>
+
+        <div class="history-table-wrapper">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Order No.</th>
+                <th>Category</th>
+                <th>Action Details</th>
+                <th>Timestamp</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr>
+                <td colspan="5" class="empty-hist">No history logs recorded yet</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
     <!-- 2. CUSTOMER TV VIEW MODE -->
@@ -723,6 +891,111 @@
     function clearInput() { input.value = ''; input.focus(); }
     function backspaceInput() { input.value = input.value.slice(0, -1); input.focus(); }
 
+    // HISTORY LOGGING SYSTEM
+    let currentHistFilter = 'all';
+
+    function addHistoryEntry(num, stage, action) {
+      const history = JSON.parse(localStorage.getItem('queueHistory') || '[]');
+      const now = new Date();
+      const entry = {
+        id: Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+        num: num,
+        stage: stage, // 'prepared', 'ready', 'done'
+        action: action,
+        timestamp: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        dateStr: now.toLocaleDateString()
+      };
+      history.unshift(entry);
+      localStorage.setItem('queueHistory', JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = JSON.parse(localStorage.getItem('queueHistory') || '[]');
+      const tbody = document.getElementById('historyTableBody');
+      if (!tbody) return;
+
+      // Update counters
+      const countAll = history.length;
+      const countPrep = history.filter(h => h.stage === 'prepared').length;
+      const countReady = history.filter(h => h.stage === 'ready').length;
+      const countDone = history.filter(h => h.stage === 'done').length;
+
+      document.getElementById('hist-cnt-all').textContent = countAll;
+      document.getElementById('hist-cnt-prepared').textContent = countPrep;
+      document.getElementById('hist-cnt-ready').textContent = countReady;
+      document.getElementById('hist-cnt-done').textContent = countDone;
+
+      // Filter entries
+      const filtered = currentHistFilter === 'all' 
+        ? history 
+        : history.filter(h => h.stage === currentHistFilter);
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-hist">No history logs recorded for this category</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => {
+        let badgeClass = 'badge-prepared';
+        let stageLabel = '⏳ Prepared';
+
+        if (item.stage === 'ready') {
+          badgeClass = 'badge-ready';
+          stageLabel = '🔔 Ready';
+        } else if (item.stage === 'done') {
+          badgeClass = 'badge-done';
+          stageLabel = '✅ Processed Done';
+        }
+
+        return `
+          <tr>
+            <td class="hist-num">#${item.num}</td>
+            <td><span class="hist-badge ${badgeClass}">${stageLabel}</span></td>
+            <td>${item.action}</td>
+            <td>${item.timestamp}</td>
+            <td>${item.dateStr}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterHistory(stage) {
+      currentHistFilter = stage;
+      document.querySelectorAll('.hist-filter-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`hist-filter-${stage}`).classList.add('active');
+      renderHistory();
+    }
+
+    function exportHistoryCSV() {
+      const history = JSON.parse(localStorage.getItem('queueHistory') || '[]');
+      if (history.length === 0) {
+        alert('No history logs to export!');
+        return;
+      }
+
+      let csv = 'Date,Time,Order Number,Category,Action Details\n';
+      history.forEach(item => {
+        csv += `"${item.dateStr}","${item.timestamp}","#${item.num}","${item.stage.toUpperCase()}","${item.action}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `queue_history_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function clearHistoryLog() {
+      if (confirm('Are you sure you want to clear all order history logs?')) {
+        localStorage.removeItem('queueHistory');
+        renderHistory();
+      }
+    }
+
     // State Management & Real-Time Sync
     const bcChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('queue_channel') : null;
     let prevReadyCount = 0;
@@ -831,8 +1104,14 @@
       }
 
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      if (status === 'preparing') createPreparingCard(num, timeStr);
-      else createReadyCard(num, timeStr);
+      
+      if (status === 'preparing') {
+        createPreparingCard(num, timeStr);
+        addHistoryEntry(num, 'prepared', 'Added to Preparing Order');
+      } else {
+        createReadyCard(num, timeStr);
+        addHistoryEntry(num, 'ready', 'Marked Order Ready');
+      }
 
       input.value = '';
       input.focus();
@@ -859,6 +1138,7 @@
         const moveTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         createReadyCard(num, moveTimeStr);
         saveState();
+        addHistoryEntry(num, 'ready', 'Moved from Preparing to Order Ready');
       };
 
       list.prepend(card);
@@ -885,6 +1165,7 @@
         updateCount('ready');
         checkEmptyState('ready');
         saveState();
+        addHistoryEntry(num, 'done', 'Order Completed & Handed to Customer');
       };
 
       list.prepend(card);
@@ -925,8 +1206,9 @@
       }
     });
 
-    // Initial State Restoration
+    // Initial State Restoration & History Render
     loadState();
+    renderHistory();
 
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') addOrder('preparing');

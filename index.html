@@ -557,24 +557,32 @@
 
     .empty-hist { text-align: center; color: #64748b; padding: 30px 0 !important; }
 
-    /* HISTORY PAGINATION STYLES */
+    /* CIRCULAR PAGINATION UI (Matching Design Inspo) */
     .history-pagination {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 14px;
-      padding-top: 14px;
+      gap: 16px;
+      margin-top: 16px;
+      padding-top: 16px;
       border-top: 1px solid var(--border-color);
       font-size: 0.85rem;
       color: var(--text-muted);
     }
 
-    .hist-page-controls {
+    .hist-page-controls-wrapper {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hist-page-select-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
     }
 
     .hist-page-select {
@@ -588,31 +596,55 @@
       cursor: pointer;
     }
 
-    .hist-nav-btn {
-      background: #334155;
-      color: #fff;
+    .hist-circle-pagination {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    .hist-circle-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
       border: 1px solid var(--border-color);
-      padding: 5px 14px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .hist-nav-btn:hover:not(:disabled) {
-      background: #475569;
-    }
-
-    .hist-nav-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .hist-page-num {
+      background: #0f172a;
+      color: #94a3b8;
+      font-size: 0.85rem;
       font-weight: 700;
-      color: #f8fafc;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .hist-circle-btn:hover:not(:disabled):not(.active) {
+      background: #334155;
+      color: #ffffff;
+      border-color: #64748b;
+    }
+
+    .hist-circle-btn.active {
+      background: #e2e8f0;
+      color: #0f172a;
+      border-color: #e2e8f0;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+    }
+
+    .hist-circle-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border-color: rgba(51, 65, 85, 0.4);
+    }
+
+    .hist-circle-ellipsis {
       padding: 0 4px;
+      color: var(--text-muted);
+      font-weight: 800;
+      letter-spacing: 1px;
     }
 
     /* 2. CUSTOMER TV VIEW STYLES */
@@ -835,22 +867,25 @@
           </table>
         </div>
 
-        <!-- History Pagination Controls -->
+        <!-- Circular History Pagination Controls (Matching Design Inspo) -->
         <div class="history-pagination">
           <div class="hist-page-info">
             Showing <span id="hist-range-start">0</span>–<span id="hist-range-end">0</span> of <span id="hist-total-items">0</span> entries
           </div>
-          <div class="hist-page-controls">
-            <label for="histPageSize">Per page:</label>
-            <select id="histPageSize" class="hist-page-select" onchange="changeHistPageSize(this.value)">
-              <option value="5">5</option>
-              <option value="10" selected>10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-            </select>
-            <button class="hist-nav-btn" id="histPrevBtn" onclick="changeHistPage(-1)" disabled>◄ Prev</button>
-            <span class="hist-page-num" id="histPageNumDisplay">Page 1 of 1</span>
-            <button class="hist-nav-btn" id="histNextBtn" onclick="changeHistPage(1)" disabled>Next ►</button>
+
+          <div class="hist-page-controls-wrapper">
+            <!-- Circular Pagination Buttons « ‹ 1 2 3 ... 18 › » -->
+            <div class="hist-circle-pagination" id="histCirclePagination"></div>
+
+            <div class="hist-page-select-box">
+              <label for="histPageSize">Per page:</label>
+              <select id="histPageSize" class="hist-page-select" onchange="changeHistPageSize(this.value)">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -969,7 +1004,7 @@
     function clearInput() { input.value = ''; input.focus(); }
     function backspaceInput() { input.value = input.value.slice(0, -1); input.focus(); }
 
-    // HISTORY LOGGING & PAGINATION SYSTEM
+    // HISTORY LOGGING & CIRCULAR PAGINATION SYSTEM
     let currentHistFilter = 'all';
     let histCurrentPage = 1;
     let histItemsPerPage = 10;
@@ -1022,9 +1057,7 @@
         document.getElementById('hist-range-start').textContent = '0';
         document.getElementById('hist-range-end').textContent = '0';
         document.getElementById('hist-total-items').textContent = '0';
-        document.getElementById('histPageNumDisplay').textContent = 'Page 1 of 1';
-        document.getElementById('histPrevBtn').disabled = true;
-        document.getElementById('histNextBtn').disabled = true;
+        renderCircularPagination(1, 0);
         return;
       }
 
@@ -1036,10 +1069,8 @@
       document.getElementById('hist-range-start').textContent = startIndex + 1;
       document.getElementById('hist-range-end').textContent = endIndex;
       document.getElementById('hist-total-items').textContent = totalItems;
-      document.getElementById('histPageNumDisplay').textContent = `Page ${histCurrentPage} of ${totalPages}`;
 
-      document.getElementById('histPrevBtn').disabled = histCurrentPage <= 1;
-      document.getElementById('histNextBtn').disabled = histCurrentPage >= totalPages;
+      renderCircularPagination(histCurrentPage, totalPages);
 
       tbody.innerHTML = paginated.map(item => {
         let badgeClass = 'badge-prepared';
@@ -1065,16 +1096,70 @@
       }).join('');
     }
 
+    function renderCircularPagination(currentPage, totalPages) {
+      const container = document.getElementById('histCirclePagination');
+      if (!container) return;
+
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+
+      // First Page «
+      html += `<button class="hist-circle-btn" onclick="goToHistPage(1)" ${currentPage === 1 ? 'disabled' : ''} title="First Page">«</button>`;
+
+      // Prev Page ‹
+      html += `<button class="hist-circle-btn" onclick="goToHistPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} title="Previous Page">‹</button>`;
+
+      // Page numbers algorithm (matching « ‹ 1 2 3 ... 18 › » design inspo)
+      const pageNumbers = getPageNumbersList(currentPage, totalPages);
+
+      pageNumbers.forEach(p => {
+        if (p === '...') {
+          html += `<span class="hist-circle-ellipsis">...</span>`;
+        } else {
+          const isActive = p === currentPage;
+          html += `<button class="hist-circle-btn ${isActive ? 'active' : ''}" onclick="goToHistPage(${p})">${p}</button>`;
+        }
+      });
+
+      // Next Page ›
+      html += `<button class="hist-circle-btn" onclick="goToHistPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} title="Next Page">›</button>`;
+
+      // Last Page »
+      html += `<button class="hist-circle-btn" onclick="goToHistPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''} title="Last Page">»</button>`;
+
+      container.innerHTML = html;
+    }
+
+    function getPageNumbersList(currentPage, totalPages) {
+      const pages = [];
+      if (totalPages <= 5) {
+        for (let i = 1; i <= totalPages; i++) pages.push(i);
+      } else {
+        if (currentPage <= 3) {
+          pages.push(1, 2, 3, '...', totalPages);
+        } else if (currentPage >= totalPages - 2) {
+          pages.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
+        } else {
+          pages.push(1, '...', currentPage, '...', totalPages);
+        }
+      }
+      return pages;
+    }
+
+    function goToHistPage(page) {
+      histCurrentPage = page;
+      renderHistory();
+    }
+
     function filterHistory(stage) {
       currentHistFilter = stage;
       histCurrentPage = 1;
       document.querySelectorAll('.hist-filter-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById(`hist-filter-${stage}`).classList.add('active');
-      renderHistory();
-    }
-
-    function changeHistPage(direction) {
-      histCurrentPage += direction;
       renderHistory();
     }
 

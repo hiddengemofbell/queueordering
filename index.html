@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Queue Calling System</title>
+  
+  <!-- PWA Meta Tags & Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1e293b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+
   <style>
     :root {
       --bg-dark: #0f172a;
@@ -456,6 +465,15 @@
   </div>
 
   <script>
+    // Register Service Worker for PWA Offline Support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('[PWA] ServiceWorker registered with scope:', reg.scope))
+          .catch(err => console.error('[PWA] ServiceWorker registration failed:', err));
+      });
+    }
+
     // Live Clock Update
     function updateClock() {
       const now = new Date();
@@ -500,6 +518,49 @@
       input.focus();
     }
 
+    // Offline State Persistence using localStorage
+    function saveState() {
+      const state = {
+        preparing: [],
+        ready: []
+      };
+
+      document.querySelectorAll('#list-preparing .card').forEach(card => {
+        const num = card.querySelector('.card-number').textContent.replace('#', '');
+        const timeStr = card.querySelector('.card-time').textContent.replace('Started at ', '');
+        state.preparing.push({ num, timeStr });
+      });
+
+      document.querySelectorAll('#list-ready .card').forEach(card => {
+        const num = card.querySelector('.card-number').textContent.replace('#', '');
+        const timeStr = card.querySelector('.card-time').textContent.replace('Ready since ', '');
+        state.ready.push({ num, timeStr });
+      });
+
+      // Preserve array order (reverse because prepend is used on create)
+      state.preparing.reverse();
+      state.ready.reverse();
+
+      localStorage.setItem('queueState', JSON.stringify(state));
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem('queueState');
+      if (!saved) return;
+
+      try {
+        const state = JSON.parse(saved);
+        if (state.preparing && Array.isArray(state.preparing)) {
+          state.preparing.forEach(item => createPreparingCard(item.num, item.timeStr, false));
+        }
+        if (state.ready && Array.isArray(state.ready)) {
+          state.ready.forEach(item => createReadyCard(item.num, item.timeStr, false));
+        }
+      } catch (err) {
+        console.error('Failed to parse saved state:', err);
+      }
+    }
+
     // Add Order to Preparing or Ready
     function addOrder(status) {
       const rawNum = input.value.trim();
@@ -539,7 +600,7 @@
       input.focus();
     }
 
-    function createPreparingCard(num, timeStr) {
+    function createPreparingCard(num, timeStr, shouldSave = true) {
       const list = document.getElementById('list-preparing');
       removeEmptyState('preparing');
 
@@ -561,13 +622,16 @@
 
         const moveTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         createReadyCard(num, moveTimeStr);
+        saveState();
       };
 
       list.prepend(card);
       updateCount('preparing');
+
+      if (shouldSave) saveState();
     }
 
-    function createReadyCard(num, timeStr) {
+    function createReadyCard(num, timeStr, shouldSave = true) {
       const list = document.getElementById('list-ready');
       removeEmptyState('ready');
 
@@ -586,10 +650,13 @@
         card.remove();
         updateCount('ready');
         checkEmptyState('ready');
+        saveState();
       };
 
       list.prepend(card);
       updateCount('ready');
+
+      if (shouldSave) saveState();
     }
 
     function removeEmptyState(status) {
@@ -610,6 +677,9 @@
       const cards = list.querySelectorAll('.card');
       document.getElementById(`count-${status}`).textContent = cards.length;
     }
+
+    // Restore saved state on page load
+    loadState();
 
     // Allow pressing Enter key to default add to Preparing Order
     input.addEventListener('keydown', (e) => {

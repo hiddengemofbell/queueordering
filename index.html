@@ -801,6 +801,114 @@
 
     .cust-card-time { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
 
+    /* CUSTOM POPUP MODAL OVERLAY STYLES */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 28px 32px;
+      max-width: 440px;
+      width: 90%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: popModal 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .modal-icon {
+      font-size: 1.8rem;
+      background: rgba(239, 68, 68, 0.15);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .modal-header h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .modal-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .modal-btn-cancel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .modal-btn-cancel:hover {
+      background: var(--border-color);
+    }
+
+    .modal-btn-confirm {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .modal-btn-confirm:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes popModal {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
     @keyframes pulseGlow {
       from { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
       to { box-shadow: 0 0 25px rgba(16, 185, 129, 0.5); }
@@ -990,7 +1098,44 @@
 
   </div>
 
+  <!-- Custom Modal Confirmation Overlay Popup -->
+  <div class="modal-overlay" id="confirmModalOverlay" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">🗑️</div>
+        <h3 id="modalTitle">Clear History Log</h3>
+      </div>
+      <p class="modal-body" id="modalMessage">Are you sure you want to clear all order history logs? This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+        <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Yes, Clear All Logs</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // Custom Modal Confirmation Popup Handler
+    let modalOnConfirmCallback = null;
+
+    function openConfirmModal(title, message, onConfirm) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalMessage').textContent = message;
+      modalOnConfirmCallback = onConfirm;
+      
+      const confirmBtn = document.getElementById('modalConfirmBtn');
+      confirmBtn.onclick = () => {
+        if (modalOnConfirmCallback) modalOnConfirmCallback();
+        closeConfirmModal();
+      };
+
+      document.getElementById('confirmModalOverlay').style.display = 'flex';
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModalOverlay').style.display = 'none';
+      modalOnConfirmCallback = null;
+    }
+
     // Independent Dual Theme Controls (Staff UI & Customer TV Display)
     function applyStaffTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
@@ -1302,7 +1447,7 @@
     function exportHistoryCSV() {
       const history = JSON.parse(localStorage.getItem('queueHistory') || '[]');
       if (history.length === 0) {
-        alert('No history logs to export!');
+        showError('No history logs to export!');
         return;
       }
 
@@ -1322,11 +1467,20 @@
     }
 
     function clearHistoryLog() {
-      if (confirm('Are you sure you want to clear all order history logs?')) {
-        localStorage.removeItem('queueHistory');
-        histCurrentPage = 1;
-        renderHistory();
+      const history = JSON.parse(localStorage.getItem('queueHistory') || '[]');
+      if (history.length === 0) {
+        showError('No history logs to clear!');
+        return;
       }
+      openConfirmModal(
+        'Clear Order History Log',
+        'Are you sure you want to clear all order history logs? This action cannot be undone.',
+        () => {
+          localStorage.removeItem('queueHistory');
+          histCurrentPage = 1;
+          renderHistory();
+        }
+      );
     }
 
     // State Management & Real-Time Sync

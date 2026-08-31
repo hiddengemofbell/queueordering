@@ -1,12 +1,12 @@
-const CACHE_NAME = 'queue-system-cache-v14';
+const CACHE_NAME = 'queue-system-cache-v15';
 const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './customer.html',
-  './manifest.json',
-  './icon.svg',
-  './icon-192.png',
-  './icon-512.png'
+  '/',
+  '/index.html',
+  '/customer.html',
+  '/manifest.json',
+  '/icon.svg',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 // Install Event - Caches Core Static Assets
@@ -37,6 +37,11 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event - Serve from Cache First, Fallback to Network
 self.addEventListener('fetch', (event) => {
+  // Only cache valid http/https requests, skip chrome-extension:// schemes
+  if (!(event.request.url.startsWith('http:') || event.request.url.startsWith('https:'))) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -54,7 +59,7 @@ self.addEventListener('fetch', (event) => {
       });
     }).catch(() => {
       // Offline fallback
-      return caches.match('./index.html');
+      return caches.match('/index.html');
     })
   );
 });

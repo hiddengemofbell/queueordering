@@ -501,11 +501,28 @@
     .history-title {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       font-size: 1.1rem;
       font-weight: 800;
       flex-wrap: wrap;
     }
+
+    .history-capacity-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      background: var(--tab-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .history-capacity-badge.warning {
+      background: rgba(245, 158, 11, 0.18);
+      color: #d97706;
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+    [data-theme="dark"] .history-capacity-badge.warning { color: #fbbf24; }
 
     .history-filters {
       display: flex;
@@ -1022,6 +1039,7 @@
         <div class="history-header">
           <div class="history-title">
             <span>📜 Order History Log</span>
+            <span class="history-capacity-badge" id="histCapacityBadge">0 / 200 logs</span>
             <div class="history-filters">
               <button class="hist-filter-btn active" id="hist-filter-all" onclick="filterHistory('all')">All (<span id="hist-cnt-all">0</span>)</button>
               <button class="hist-filter-btn" id="hist-filter-prepared" onclick="filterHistory('prepared')">⏳ Prepared (<span id="hist-cnt-prepared">0</span>)</button>
@@ -1162,6 +1180,12 @@
         const themeChannel = new BroadcastChannel('customer_theme_channel');
         themeChannel.postMessage(theme);
       }
+      // Broadcast via HTTP POST for SSE multi-device sync
+      fetch('/api/customer-theme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme: theme })
+      }).catch(() => {});
     }
 
     function toggleCustomerTheme() {
@@ -1295,6 +1319,19 @@
       const history = JSON.parse(localStorage.getItem('queueHistory') || '[]');
       const tbody = document.getElementById('historyTableBody');
       if (!tbody) return;
+
+      // Update Capacity Badge
+      const capBadge = document.getElementById('histCapacityBadge');
+      if (capBadge) {
+        capBadge.textContent = `${history.length} / 200 logs`;
+        if (history.length >= 180) {
+          capBadge.className = 'history-capacity-badge warning';
+          capBadge.title = 'Approaching 200 log limit! Consider exporting CSV.';
+        } else {
+          capBadge.className = 'history-capacity-badge';
+          capBadge.title = 'History log capacity';
+        }
+      }
 
       // Update category counters
       const countAll = history.length;
@@ -1509,6 +1546,13 @@
       localStorage.setItem('queueState', JSON.stringify(state));
       if (bcChannel) bcChannel.postMessage(state);
       syncCustomerView(state);
+
+      // Broadcast via HTTP POST for SSE multi-device sync
+      fetch('/api/queue-state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state)
+      }).catch(() => {});
     }
 
     function syncCustomerView(state) {

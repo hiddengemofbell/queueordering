@@ -270,6 +270,7 @@
     // Customer Display Theme Sync Logic
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('customerTheme', theme);
     }
 
     // Apply initial customer theme set by staff
@@ -371,7 +372,21 @@
       }
     }
 
-    // Real-Time BroadcastChannel Listeners
+    // 1. Real-Time Server-Sent Events (SSE) Listener (Multi-Device Network Sync)
+    if ('EventSource' in window) {
+      const sse = new EventSource('/events');
+      sse.addEventListener('queueState', (e) => {
+        try { renderDisplay(JSON.parse(e.data)); } catch (err) { console.error('SSE queueState parse error:', err); }
+      });
+      sse.addEventListener('customerTheme', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.theme) applyTheme(data.theme);
+        } catch (err) { console.error('SSE customerTheme parse error:', err); }
+      });
+    }
+
+    // 2. BroadcastChannel Listener (Same Device / Cross-Tab Sync)
     if ('BroadcastChannel' in window) {
       const channel = new BroadcastChannel('queue_channel');
       channel.onmessage = (event) => {
@@ -384,7 +399,7 @@
       };
     }
 
-    // Fallback Storage Event Listener
+    // 3. Fallback Storage Event Listener
     window.addEventListener('storage', (e) => {
       if (e.key === 'queueState') syncFromLocalStorage();
       if (e.key === 'customerTheme') applyTheme(e.newValue || 'dark');

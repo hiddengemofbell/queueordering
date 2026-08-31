@@ -23,7 +23,9 @@
       --text-muted: #94a3b8;
       
       --color-preparing: #f59e0b;
+      --color-preparing-dark: #b45309;
       --color-ready: #10b981;
+      --color-ready-dark: #047857;
     }
 
     * {
@@ -39,39 +41,102 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      user-select: none;
     }
 
-    /* Header */
+    /* Header & Navigation Bar */
     header {
       background: var(--panel-bg);
-      padding: 14px 24px;
+      padding: 12px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border-color);
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
-    .btn-customer-view {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #34d399;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 0.85rem;
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      background: #0f172a;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.9rem;
       font-weight: 700;
+      border-radius: 8px;
       cursor: pointer;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
       gap: 8px;
-      transition: all 0.2s ease;
-      text-decoration: none;
     }
 
-    .btn-customer-view:hover {
-      background: rgba(16, 185, 129, 0.3);
+    .tab-btn:hover {
       color: #fff;
-      transform: translateY(-1px);
+    }
+
+    .tab-btn.active {
+      background: #334155;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .popout-btn {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #60a5fa;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .popout-btn:hover {
+      background: rgba(59, 130, 246, 0.3);
+      color: #fff;
+    }
+
+    .sound-btn {
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .sound-btn.active {
+      color: #34d399;
+      border-color: #059669;
+      background: rgba(5, 150, 105, 0.15);
     }
 
     .live-clock {
@@ -81,8 +146,15 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* Main Content Layout */
-    .main-container {
+    /* Main View Container */
+    .view-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 1. STAFF VIEW STYLES */
+    .staff-container {
       flex: 1;
       display: grid;
       grid-template-columns: 340px 1fr;
@@ -94,12 +166,11 @@
     }
 
     @media (max-width: 960px) {
-      .main-container {
+      .staff-container {
         grid-template-columns: 1fr;
       }
     }
 
-    /* Control Panel (Keypad & Call Actions) */
     .control-panel {
       background: var(--panel-bg);
       border: 1px solid var(--border-color);
@@ -170,7 +241,6 @@
       transition: opacity 0.2s;
     }
 
-    /* Keypad Grid */
     .keypad {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -193,31 +263,12 @@
       justify-content: center;
     }
 
-    .key-btn:hover {
-      background: #475569;
-    }
+    .key-btn:hover { background: #475569; }
+    .key-btn:active { transform: scale(0.96); background: #1e293b; }
+    .key-btn.btn-action { background: #0f172a; color: #94a3b8; font-size: 1.1rem; }
+    .key-btn.btn-action:hover { background: #1e293b; color: #fff; }
+    .key-btn.btn-clear { color: #ef4444; }
 
-    .key-btn:active {
-      transform: scale(0.96);
-      background: #1e293b;
-    }
-
-    .key-btn.btn-action {
-      background: #0f172a;
-      color: #94a3b8;
-      font-size: 1.1rem;
-    }
-
-    .key-btn.btn-action:hover {
-      background: #1e293b;
-      color: #fff;
-    }
-
-    .key-btn.btn-clear {
-      color: #ef4444;
-    }
-
-    /* Calling Action Buttons */
     .action-buttons {
       display: flex;
       flex-direction: column;
@@ -242,29 +293,19 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
 
-    .call-btn:hover {
-      filter: brightness(1.15);
-      transform: translateY(-1px);
-    }
-
-    .call-btn:active {
-      transform: translateY(1px);
-    }
-
+    .call-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+    .call-btn:active { transform: translateY(1px); }
     .btn-preparing { background: linear-gradient(135deg, #f59e0b, #d97706); }
     .btn-ready { background: linear-gradient(135deg, #10b981, #047857); }
 
-    /* Display Board */
-    .board {
+    .staff-board {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
 
     @media (max-width: 768px) {
-      .board {
-        grid-template-columns: 1fr;
-      }
+      .staff-board { grid-template-columns: 1fr; }
     }
 
     .column {
@@ -334,11 +375,7 @@
       transition: all 0.2s ease;
     }
 
-    .card:hover {
-      border-color: #64748b;
-      background: #182234;
-      transform: scale(1.02);
-    }
+    .card:hover { border-color: #64748b; background: #182234; transform: scale(1.02); }
 
     .card-info {
       display: flex;
@@ -357,20 +394,10 @@
       text-overflow: ellipsis;
     }
 
-    .ready-card .card-number {
-      color: #34d399;
-      text-shadow: 0 0 12px rgba(52, 211, 153, 0.3);
-    }
+    .ready-card .card-number { color: #34d399; text-shadow: 0 0 12px rgba(52, 211, 153, 0.3); }
+    .preparing-card .card-number { color: #fbbf24; }
 
-    .preparing-card .card-number {
-      color: #fbbf24;
-    }
-
-    .card-time {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      white-space: nowrap;
-    }
+    .card-time { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
 
     .card-action-hint {
       font-size: 0.75rem;
@@ -382,24 +409,97 @@
       flex-shrink: 0;
     }
 
-    .preparing-card .card-action-hint {
-      color: #fbbf24;
-      background: rgba(251, 191, 36, 0.12);
-      border: 1px solid rgba(251, 191, 36, 0.3);
+    .preparing-card .card-action-hint { color: #fbbf24; background: rgba(251, 191, 36, 0.12); border: 1px solid rgba(251, 191, 36, 0.3); }
+    .preparing-card:hover .card-action-hint { background: rgba(251, 191, 36, 0.25); }
+    .ready-card .card-action-hint { color: #ef4444; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .ready-card:hover .card-action-hint { background: rgba(239, 68, 68, 0.25); }
+
+    /* 2. CUSTOMER TV VIEW STYLES */
+    .customer-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 24px;
+      padding: 24px;
+      max-width: 1800px;
+      width: 100%;
+      margin: 0 auto;
     }
 
-    .preparing-card:hover .card-action-hint {
-      background: rgba(251, 191, 36, 0.25);
+    @media (max-width: 800px) {
+      .customer-container { grid-template-columns: 1fr; }
     }
 
-    .ready-card .card-action-hint {
-      color: #ef4444;
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+    .cust-column {
+      background: var(--panel-bg);
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
     }
 
-    .ready-card:hover .card-action-hint {
-      background: rgba(239, 68, 68, 0.25);
+    .cust-col-header {
+      padding: 20px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.6rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .cust-preparing-header { background: linear-gradient(135deg, #d97706, #92400e); }
+    .cust-ready-header { background: linear-gradient(135deg, #059669, #047857); }
+
+    .cust-grid {
+      flex: 1;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 18px;
+      align-content: start;
+      overflow-y: auto;
+    }
+
+    .cust-card {
+      background: #090d16;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .cust-preparing-card { border-color: rgba(245, 158, 11, 0.3); }
+    .cust-preparing-card .cust-card-number { color: #fbbf24; font-size: 3rem; font-weight: 900; letter-spacing: 2px; }
+
+    .cust-ready-card {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: linear-gradient(180deg, #090d16 0%, #064e3b 140%);
+      animation: pulseGlow 1.5s infinite alternate ease-in-out, popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .cust-ready-card .cust-card-number {
+      color: #34d399;
+      font-size: 3.5rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
+    }
+
+    .cust-card-time { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+      to { box-shadow: 0 0 25px rgba(16, 185, 129, 0.6); }
     }
 
     @keyframes popIn {
@@ -410,92 +510,124 @@
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Navigation & Header Bar -->
   <header>
-    <a href="customer.html" target="_blank" class="btn-customer-view">
-      📺 Open Customer Display
-    </a>
-    <div class="live-clock" id="liveClock">--:--:--</div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="tab-staff" onclick="switchView('staff')">
+        🛠️ Staff Control Panel
+      </button>
+      <button class="tab-btn" id="tab-customer" onclick="switchView('customer')">
+        📺 Customer Display Board
+      </button>
+    </div>
+
+    <div class="header-right">
+      <button class="sound-btn active" id="soundBtn" onclick="toggleSound()">
+        🔔 Chime: ON
+      </button>
+      <a href="customer.html" target="_blank" class="popout-btn">
+        Pop-out Window ↗
+      </a>
+      <div class="live-clock" id="liveClock">--:--:--</div>
+    </div>
   </header>
 
-  <!-- Main Grid Layout -->
-  <div class="main-container">
-    
-    <!-- Control Panel -->
-    <div class="control-panel">
-      <div class="panel-title">Order Entry</div>
-      
-      <!-- Number Display Input -->
-      <div class="input-display">
-        <input type="text" id="orderInput" placeholder="No." autofocus autocomplete="off" />
-      </div>
-      <div class="error-msg" id="errorMsg"></div>
+  <!-- View Content Wrapper -->
+  <div class="view-content">
 
-      <!-- On-Screen Keypad -->
-      <div class="keypad">
-        <button class="key-btn" onclick="appendNumber('1')">1</button>
-        <button class="key-btn" onclick="appendNumber('2')">2</button>
-        <button class="key-btn" onclick="appendNumber('3')">3</button>
+    <!-- 1. STAFF VIEW MODE -->
+    <div class="staff-container" id="staffView">
+      <div class="control-panel">
+        <div class="panel-title">Order Entry</div>
         
-        <button class="key-btn" onclick="appendNumber('4')">4</button>
-        <button class="key-btn" onclick="appendNumber('5')">5</button>
-        <button class="key-btn" onclick="appendNumber('6')">6</button>
-        
-        <button class="key-btn" onclick="appendNumber('7')">7</button>
-        <button class="key-btn" onclick="appendNumber('8')">8</button>
-        <button class="key-btn" onclick="appendNumber('9')">9</button>
-        
-        <button class="key-btn btn-action btn-clear" onclick="clearInput()">C</button>
-        <button class="key-btn" onclick="appendNumber('0')">0</button>
-        <button class="key-btn btn-action" onclick="backspaceInput()">⌫</button>
+        <div class="input-display">
+          <input type="text" id="orderInput" placeholder="No." autofocus autocomplete="off" />
+        </div>
+        <div class="error-msg" id="errorMsg"></div>
+
+        <div class="keypad">
+          <button class="key-btn" onclick="appendNumber('1')">1</button>
+          <button class="key-btn" onclick="appendNumber('2')">2</button>
+          <button class="key-btn" onclick="appendNumber('3')">3</button>
+          
+          <button class="key-btn" onclick="appendNumber('4')">4</button>
+          <button class="key-btn" onclick="appendNumber('5')">5</button>
+          <button class="key-btn" onclick="appendNumber('6')">6</button>
+          
+          <button class="key-btn" onclick="appendNumber('7')">7</button>
+          <button class="key-btn" onclick="appendNumber('8')">8</button>
+          <button class="key-btn" onclick="appendNumber('9')">9</button>
+          
+          <button class="key-btn btn-action btn-clear" onclick="clearInput()">C</button>
+          <button class="key-btn" onclick="appendNumber('0')">0</button>
+          <button class="key-btn btn-action" onclick="backspaceInput()">⌫</button>
+        </div>
+
+        <div class="action-buttons">
+          <button class="call-btn btn-preparing" onclick="addOrder('preparing')">
+            ⏳ Add to Preparing Order
+          </button>
+          <button class="call-btn btn-ready" onclick="addOrder('ready')">
+            🔔 Mark Order Ready
+          </button>
+        </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <button class="call-btn btn-preparing" onclick="addOrder('preparing')">
-          ⏳ Add to Preparing Order
-        </button>
-        <button class="call-btn btn-ready" onclick="addOrder('ready')">
-          🔔 Mark Order Ready
-        </button>
+      <div class="staff-board">
+        <div class="column">
+          <div class="col-header preparing-header">
+            <span>Preparing Order</span>
+            <span class="badge" id="count-preparing">0</span>
+          </div>
+          <div class="number-list" id="list-preparing">
+            <div class="empty-state">No orders preparing</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-header ready-header">
+            <span>Order Ready</span>
+            <span class="badge" id="count-ready">0</span>
+          </div>
+          <div class="number-list" id="list-ready">
+            <div class="empty-state">No orders ready</div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Display Board -->
-    <div class="board">
-      
-      <!-- Preparing Column -->
-      <div class="column">
-        <div class="col-header preparing-header">
+    <!-- 2. CUSTOMER TV VIEW MODE -->
+    <div class="customer-container" id="customerView" style="display: none;">
+      <div class="cust-column">
+        <div class="cust-col-header cust-preparing-header">
           <span>Preparing Order</span>
-          <span class="badge" id="count-preparing">0</span>
+          <span class="badge" id="cust-count-preparing">0</span>
         </div>
-        <div class="number-list" id="list-preparing">
+        <div class="cust-grid" id="cust-list-preparing">
           <div class="empty-state">No orders preparing</div>
         </div>
       </div>
 
-      <!-- Order Ready Column -->
-      <div class="column">
-        <div class="col-header ready-header">
+      <div class="cust-column">
+        <div class="cust-col-header cust-ready-header">
           <span>Order Ready</span>
-          <span class="badge" id="count-ready">0</span>
+          <span class="badge" id="cust-count-ready">0</span>
         </div>
-        <div class="number-list" id="list-ready">
+        <div class="cust-grid" id="cust-list-ready">
           <div class="empty-state">No orders ready</div>
         </div>
       </div>
-
     </div>
+
   </div>
 
   <script>
-    // Register Service Worker for PWA Offline Support
+    // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('[PWA] ServiceWorker registered with scope:', reg.scope))
-          .catch(err => console.error('[PWA] ServiceWorker registration failed:', err));
+          .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+          .catch(err => console.error('[PWA] Service Worker registration failed:', err));
       });
     }
 
@@ -507,80 +639,144 @@
     setInterval(updateClock, 1000);
     updateClock();
 
+    // Sound Chime Logic (Web Audio API)
+    let soundEnabled = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('soundBtn');
+      if (soundEnabled) {
+        btn.className = 'sound-btn active';
+        btn.innerHTML = '🔔 Chime: ON';
+        playChime();
+      } else {
+        btn.className = 'sound-btn';
+        btn.innerHTML = '🔕 Chime: OFF';
+      }
+    }
+
+    function playChime() {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc1 = audioCtx.createOscillator(), gain1 = audioCtx.createGain();
+        osc1.type = 'sine'; osc1.frequency.setValueAtTime(659.25, now);
+        gain1.gain.setValueAtTime(0.3, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc1.connect(gain1); gain1.connect(audioCtx.destination);
+        osc1.start(now); osc1.stop(now + 0.8);
+
+        const osc2 = audioCtx.createOscillator(), gain2 = audioCtx.createGain();
+        osc2.type = 'sine'; osc2.frequency.setValueAtTime(783.99, now + 0.25);
+        gain2.gain.setValueAtTime(0.4, now + 0.25); gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc2.connect(gain2); gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.25); osc2.stop(now + 1.2);
+      } catch (err) { console.warn('Audio chime error:', err); }
+    }
+
+    // View Switching (Staff vs Customer Display)
+    let activeView = 'staff';
+    function switchView(mode) {
+      activeView = mode;
+      document.getElementById('staffView').style.display = mode === 'staff' ? 'grid' : 'none';
+      document.getElementById('customerView').style.display = mode === 'customer' ? 'grid' : 'none';
+      document.getElementById('tab-staff').className = mode === 'staff' ? 'tab-btn active' : 'tab-btn';
+      document.getElementById('tab-customer').className = mode === 'customer' ? 'tab-btn active' : 'tab-btn';
+
+      if (mode === 'staff') {
+        document.getElementById('orderInput').focus();
+      } else {
+        syncCustomerView(getCurrentState());
+      }
+    }
+
     // Keypad & Input Helpers
     const input = document.getElementById('orderInput');
-
-    // Restrict input field to digits only
-    input.addEventListener('input', () => {
-      input.value = input.value.replace(/[^0-9]/g, '');
-    });
+    input.addEventListener('input', () => { input.value = input.value.replace(/[^0-9]/g, ''); });
 
     function showError(msg) {
       const errorEl = document.getElementById('errorMsg');
       const inputDisplay = document.querySelector('.input-display');
-      
       errorEl.textContent = msg;
       inputDisplay.classList.add('error');
-
-      setTimeout(() => {
-        errorEl.textContent = '';
-        inputDisplay.classList.remove('error');
-      }, 3000);
+      setTimeout(() => { errorEl.textContent = ''; inputDisplay.classList.remove('error'); }, 3000);
     }
 
-    function appendNumber(num) {
-      input.value += num;
-      input.focus();
-    }
+    function appendNumber(num) { input.value += num; input.focus(); }
+    function clearInput() { input.value = ''; input.focus(); }
+    function backspaceInput() { input.value = input.value.slice(0, -1); input.focus(); }
 
-    function clearInput() {
-      input.value = '';
-      input.focus();
-    }
-
-    function backspaceInput() {
-      input.value = input.value.slice(0, -1);
-      input.focus();
-    }
-
-    // BroadcastChannel for instant real-time cross-window sync
+    // State Management & Real-Time Sync
     const bcChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('queue_channel') : null;
+    let prevReadyCount = 0;
 
-    // Offline State Persistence using localStorage
-    function saveState() {
-      const state = {
-        preparing: [],
-        ready: []
-      };
-
+    function getCurrentState() {
+      const state = { preparing: [], ready: [] };
       document.querySelectorAll('#list-preparing .card').forEach(card => {
         const num = card.querySelector('.card-number').textContent.replace('#', '');
         const timeStr = card.querySelector('.card-time').textContent.replace('Started at ', '');
         state.preparing.push({ num, timeStr });
       });
-
       document.querySelectorAll('#list-ready .card').forEach(card => {
         const num = card.querySelector('.card-number').textContent.replace('#', '');
         const timeStr = card.querySelector('.card-time').textContent.replace('Ready since ', '');
         state.ready.push({ num, timeStr });
       });
-
-      // Preserve array order (reverse because prepend is used on create)
       state.preparing.reverse();
       state.ready.reverse();
+      return state;
+    }
 
+    function saveState() {
+      const state = getCurrentState();
       localStorage.setItem('queueState', JSON.stringify(state));
+      if (bcChannel) bcChannel.postMessage(state);
+      syncCustomerView(state);
+    }
 
-      // Broadcast real-time update to customer display panel
-      if (bcChannel) {
-        bcChannel.postMessage(state);
+    function syncCustomerView(state) {
+      if (!state) return;
+      const custPrepList = document.getElementById('cust-list-preparing');
+      const custReadyList = document.getElementById('cust-list-ready');
+
+      if (state.preparing && Array.isArray(state.preparing)) {
+        if (state.preparing.length === 0) {
+          custPrepList.innerHTML = '<div class="empty-state">No orders preparing</div>';
+        } else {
+          custPrepList.innerHTML = '';
+          state.preparing.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'cust-card cust-preparing-card';
+            card.innerHTML = `<span class="cust-card-number">#${item.num}</span><span class="cust-card-time">Started at ${item.timeStr}</span>`;
+            custPrepList.appendChild(card);
+          });
+        }
+        document.getElementById('cust-count-preparing').textContent = state.preparing.length;
+      }
+
+      if (state.ready && Array.isArray(state.ready)) {
+        if (state.ready.length === 0) {
+          custReadyList.innerHTML = '<div class="empty-state">No orders ready</div>';
+        } else {
+          custReadyList.innerHTML = '';
+          state.ready.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'cust-card cust-ready-card';
+            card.innerHTML = `<span class="cust-card-number">#${item.num}</span><span class="cust-card-time">Ready since ${item.timeStr}</span>`;
+            custReadyList.appendChild(card);
+          });
+        }
+        document.getElementById('cust-count-ready').textContent = state.ready.length;
+
+        if (state.ready.length > prevReadyCount) playChime();
+        prevReadyCount = state.ready.length;
       }
     }
 
     function loadState() {
       const saved = localStorage.getItem('queueState');
       if (!saved) return;
-
       try {
         const state = JSON.parse(saved);
         if (state.preparing && Array.isArray(state.preparing)) {
@@ -589,12 +785,11 @@
         if (state.ready && Array.isArray(state.ready)) {
           state.ready.forEach(item => createReadyCard(item.num, item.timeStr, false));
         }
-      } catch (err) {
-        console.error('Failed to parse saved state:', err);
-      }
+        syncCustomerView(state);
+      } catch (err) { console.error('Failed to parse saved state:', err); }
     }
 
-    // Add Order to Preparing or Ready
+    // Add Order Logic
     function addOrder(status) {
       const rawNum = input.value.trim();
       if (!rawNum) return;
@@ -607,7 +802,6 @@
 
       const num = String(parsedVal).padStart(4, '0');
 
-      // Check for duplicates with specific status messages
       const preparingCards = Array.from(document.querySelectorAll('#list-preparing .card-number'));
       if (preparingCards.some(card => card.textContent === `#${num}`)) {
         showError(`Order #${num} is already preparing!`);
@@ -621,14 +815,9 @@
       }
 
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (status === 'preparing') createPreparingCard(num, timeStr);
+      else createReadyCard(num, timeStr);
 
-      if (status === 'preparing') {
-        createPreparingCard(num, timeStr);
-      } else {
-        createReadyCard(num, timeStr);
-      }
-
-      // Reset input
       input.value = '';
       input.focus();
     }
@@ -647,12 +836,10 @@
         <span class="card-action-hint">Ready →</span>
       `;
 
-      // Clicking preparing card moves it to Order Ready
       card.onclick = () => {
         card.remove();
         updateCount('preparing');
         checkEmptyState('preparing');
-
         const moveTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         createReadyCard(num, moveTimeStr);
         saveState();
@@ -660,7 +847,6 @@
 
       list.prepend(card);
       updateCount('preparing');
-
       if (shouldSave) saveState();
     }
 
@@ -678,7 +864,6 @@
         <span class="card-action-hint">Done ✓</span>
       `;
 
-      // Clicking ready card dismisses/completes the order
       card.onclick = () => {
         card.remove();
         updateCount('ready');
@@ -688,7 +873,6 @@
 
       list.prepend(card);
       updateCount('ready');
-
       if (shouldSave) saveState();
     }
 
@@ -711,14 +895,25 @@
       document.getElementById(`count-${status}`).textContent = cards.length;
     }
 
-    // Restore saved state on page load
+    // Cross-window Broadcast Listener
+    if (bcChannel) {
+      bcChannel.onmessage = (event) => {
+        if (event.data) syncCustomerView(event.data);
+      };
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'queueState') {
+        const saved = localStorage.getItem('queueState');
+        if (saved) syncCustomerView(JSON.parse(saved));
+      }
+    });
+
+    // Initial State Restoration
     loadState();
 
-    // Allow pressing Enter key to default add to Preparing Order
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        addOrder('preparing');
-      }
+      if (e.key === 'Enter') addOrder('preparing');
     });
   </script>
 </body>

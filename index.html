@@ -293,10 +293,11 @@
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 14px;
-      padding: 18px;
+      padding: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
       cursor: pointer;
       animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       transition: all 0.2s ease;
@@ -312,12 +313,17 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      flex: 1;
+      min-width: 0;
     }
 
     .card-number {
-      font-size: 2.4rem;
+      font-size: 1.75rem;
       font-weight: 800;
       letter-spacing: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .ready-card .card-number {
@@ -332,15 +338,17 @@
     .card-time {
       font-size: 0.75rem;
       color: var(--text-muted);
+      white-space: nowrap;
     }
 
     .card-action-hint {
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 8px 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 10px;
       border-radius: 8px;
       transition: all 0.2s ease;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .preparing-card .card-action-hint {
@@ -542,7 +550,7 @@
           <span class="card-number">#${num}</span>
           <span class="card-time">Started at ${timeStr}</span>
         </div>
-        <span class="card-action-hint">Move to Ready →</span>
+        <span class="card-action-hint">Ready →</span>
       `;
 
       // Clicking preparing card moves it to Order Ready

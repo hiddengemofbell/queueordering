@@ -876,16 +876,6 @@
           <div class="hist-page-controls-wrapper">
             <!-- Circular Pagination Buttons « ‹ 1 2 3 ... 18 › » -->
             <div class="hist-circle-pagination" id="histCirclePagination"></div>
-
-            <div class="hist-page-select-box">
-              <label for="histPageSize">Per page:</label>
-              <select id="histPageSize" class="hist-page-select" onchange="changeHistPageSize(this.value)">
-                <option value="5">5</option>
-                <option value="10" selected>10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-              </select>
-            </div>
           </div>
         </div>
 
@@ -1007,7 +997,7 @@
     // HISTORY LOGGING & CIRCULAR PAGINATION SYSTEM
     let currentHistFilter = 'all';
     let histCurrentPage = 1;
-    let histItemsPerPage = 10;
+    let histItemsPerPage = 50;
 
     function addHistoryEntry(num, stage, action) {
       const history = JSON.parse(localStorage.getItem('queueHistory') || '[]');

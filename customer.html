@@ -17,6 +17,7 @@
     :root {
       --bg-dark: #090d16;
       --panel-bg: #111827;
+      --card-bg: #090d16;
       --border-color: #1f2937;
       --text-main: #f9fafb;
       --text-muted: #9ca3af;
@@ -25,6 +26,15 @@
       --color-preparing-gradient: linear-gradient(135deg, #d97706, #92400e);
       --color-ready: #10b981;
       --color-ready-gradient: linear-gradient(135deg, #059669, #047857);
+    }
+
+    [data-theme="light"] {
+      --bg-dark: #f1f5f9;
+      --panel-bg: #ffffff;
+      --card-bg: #f8fafc;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
     }
 
     * {
@@ -42,17 +52,18 @@
       flex-direction: column;
       overflow: hidden;
       user-select: none;
+      transition: background 0.25s ease, color 0.25s ease;
     }
 
     /* Header */
     header {
       background: var(--panel-bg);
-      padding: 20px 36px;
+      padding: 16px 36px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 2px solid var(--border-color);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .brand {
@@ -62,7 +73,7 @@
       font-size: 1.6rem;
       font-weight: 800;
       letter-spacing: 0.5px;
-      color: #fff;
+      color: var(--text-main);
     }
 
     .brand svg {
@@ -71,15 +82,40 @@
       fill: var(--color-ready);
     }
 
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--text-muted);
+    }
+
     .live-clock {
       font-size: 1.4rem;
-      color: #f3f4f6;
+      color: var(--text-main);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
-      background: #1f2937;
+      background: var(--card-bg);
       padding: 6px 18px;
       border-radius: 10px;
-      border: 1px solid #374151;
+      border: 1px solid var(--border-color);
     }
 
     /* Main TV Display Board Layout */
@@ -99,7 +135,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
     }
 
     .col-header {
@@ -143,14 +179,14 @@
       grid-column: 1 / -1;
       margin: auto;
       text-align: center;
-      color: #4b5563;
+      color: var(--text-muted);
       font-size: 1.3rem;
       font-weight: 600;
       padding: 100px 0;
     }
 
     .card {
-      background: #090d16;
+      background: var(--card-bg);
       border: 2px solid var(--border-color);
       border-radius: 16px;
       padding: 20px 16px;
@@ -160,31 +196,39 @@
       justify-content: center;
       text-align: center;
       animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
     .preparing-card {
-      border-color: rgba(245, 158, 11, 0.3);
+      border-color: rgba(245, 158, 11, 0.4);
     }
 
     .preparing-card .card-number {
-      color: #fbbf24;
+      color: #d97706;
       font-size: 3.2rem;
       font-weight: 900;
       letter-spacing: 2px;
     }
 
+    [data-theme="dark"] .preparing-card .card-number {
+      color: #fbbf24;
+    }
+
     .ready-card {
-      border-color: rgba(16, 185, 129, 0.5);
-      background: linear-gradient(180deg, #090d16 0%, #064e3b 140%);
+      border-color: rgba(16, 185, 129, 0.6);
+      background: linear-gradient(180deg, var(--card-bg) 0%, rgba(16, 185, 129, 0.15) 140%);
       animation: pulseGlow 1.5s infinite alternate ease-in-out, popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .ready-card .card-number {
-      color: #34d399;
+      color: #059669;
       font-size: 3.8rem;
       font-weight: 900;
       letter-spacing: 2px;
+    }
+
+    [data-theme="dark"] .ready-card .card-number {
+      color: #34d399;
       text-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
     }
 
@@ -197,7 +241,7 @@
 
     @keyframes pulseGlow {
       from { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
-      to { box-shadow: 0 0 25px rgba(16, 185, 129, 0.6); }
+      to { box-shadow: 0 0 25px rgba(16, 185, 129, 0.5); }
     }
 
     @keyframes popIn {
@@ -217,7 +261,12 @@
       NOW SERVING
     </div>
     
-    <div class="live-clock" id="liveClock">--:--:--</div>
+    <div class="header-controls">
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">
+        🌙 Dark
+      </button>
+      <div class="live-clock" id="liveClock">--:--:--</div>
+    </div>
   </header>
 
   <!-- Main Board Display -->
@@ -248,6 +297,25 @@
   </div>
 
   <script>
+    // Theme Switcher Logic
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        btn.innerHTML = theme === 'light' ? '☀️ Light' : '🌙 Dark';
+      }
+      localStorage.setItem('appTheme', theme);
+    }
+
+    function toggleTheme() {
+      const current = localStorage.getItem('appTheme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+    }
+
+    // Apply initial saved theme
+    applyTheme(localStorage.getItem('appTheme') || 'dark');
+
     // Register Service Worker for PWA Offline Support
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -265,59 +333,25 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Sound Chime Logic (Web Audio API - No external files needed)
-    let soundEnabled = true;
+    // Sound Chime Logic (Web Audio API)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    function toggleSound() {
-      soundEnabled = !soundEnabled;
-      const btn = document.getElementById('soundBtn');
-      if (soundEnabled) {
-        btn.className = 'sound-toggle active';
-        btn.innerHTML = '<span>🔔</span> Sound Chime: ON';
-        playChime(); // Play test chime
-      } else {
-        btn.className = 'sound-toggle';
-        btn.innerHTML = '<span>🔕</span> Sound Chime: OFF';
-      }
-    }
-
     function playChime() {
-      if (!soundEnabled) return;
       try {
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-        
-        // Pleasant Two-Tone Bell Chime (E5 -> G5)
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
-        
-        // Note 1
-        const osc1 = audioCtx.createOscillator();
-        const gain1 = audioCtx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(659.25, now); // E5
-        gain1.gain.setValueAtTime(0.3, now);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-        osc1.connect(gain1);
-        gain1.connect(audioCtx.destination);
-        osc1.start(now);
-        osc1.stop(now + 0.8);
+        const osc1 = audioCtx.createOscillator(), gain1 = audioCtx.createGain();
+        osc1.type = 'sine'; osc1.frequency.setValueAtTime(659.25, now);
+        gain1.gain.setValueAtTime(0.3, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc1.connect(gain1); gain1.connect(audioCtx.destination);
+        osc1.start(now); osc1.stop(now + 0.8);
 
-        // Note 2
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(783.99, now + 0.25); // G5
-        gain2.gain.setValueAtTime(0.4, now + 0.25);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
-        osc2.connect(gain2);
-        gain2.connect(audioCtx.destination);
-        osc2.start(now + 0.25);
-        osc2.stop(now + 1.2);
-      } catch (err) {
-        console.warn('Audio chime error:', err);
-      }
+        const osc2 = audioCtx.createOscillator(), gain2 = audioCtx.createGain();
+        osc2.type = 'sine'; osc2.frequency.setValueAtTime(783.99, now + 0.25);
+        gain2.gain.setValueAtTime(0.4, now + 0.25); gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc2.connect(gain2); gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.25); osc2.stop(now + 1.2);
+      } catch (err) { console.warn('Audio chime error:', err); }
     }
 
     // State Synchronization Logic
@@ -329,7 +363,6 @@
       const preparingList = document.getElementById('list-preparing');
       const readyList = document.getElementById('list-ready');
 
-      // 1. Render Preparing Orders
       if (state.preparing && Array.isArray(state.preparing)) {
         if (state.preparing.length === 0) {
           preparingList.innerHTML = '<div class="empty-state">No orders preparing</div>';
@@ -348,7 +381,6 @@
         document.getElementById('count-preparing').textContent = state.preparing.length;
       }
 
-      // 2. Render Order Ready
       if (state.ready && Array.isArray(state.ready)) {
         if (state.ready.length === 0) {
           readyList.innerHTML = '<div class="empty-state">No orders ready</div>';
@@ -366,7 +398,6 @@
         }
         document.getElementById('count-ready').textContent = state.ready.length;
 
-        // Play chime if a new order entered Ready
         if (state.ready.length > prevReadyCount) {
           playChime();
         }
@@ -377,11 +408,7 @@
     function syncFromLocalStorage() {
       const saved = localStorage.getItem('queueState');
       if (saved) {
-        try {
-          renderDisplay(JSON.parse(saved));
-        } catch (e) {
-          console.error('State parse error:', e);
-        }
+        try { renderDisplay(JSON.parse(saved)); } catch (e) { console.error('State parse error:', e); }
       }
     }
 
@@ -389,20 +416,16 @@
     if ('BroadcastChannel' in window) {
       const channel = new BroadcastChannel('queue_channel');
       channel.onmessage = (event) => {
-        if (event.data) {
-          renderDisplay(event.data);
-        }
+        if (event.data) renderDisplay(event.data);
       };
     }
 
     // Fallback Storage Event Listener
     window.addEventListener('storage', (e) => {
-      if (e.key === 'queueState') {
-        syncFromLocalStorage();
-      }
+      if (e.key === 'queueState') syncFromLocalStorage();
+      if (e.key === 'appTheme') applyTheme(e.newValue || 'dark');
     });
 
-    // Initial Load
     syncFromLocalStorage();
   </script>
 </body>

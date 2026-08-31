@@ -536,6 +536,31 @@
     .history-actions {
       display: flex;
       gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .history-search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .history-search-input {
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      width: 220px;
+      transition: all 0.2s ease;
+    }
+
+    .history-search-input:focus {
+      border-color: var(--color-ready);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
     }
 
     .hist-act-btn {
@@ -897,6 +922,9 @@
             </div>
           </div>
           <div class="history-actions">
+            <div class="history-search-box">
+              <input type="text" id="histSearchInput" class="history-search-input" placeholder="🔍 Search Order No, details..." oninput="handleHistSearch()" autocomplete="off" />
+            </div>
             <button class="hist-act-btn export-btn" onclick="exportHistoryCSV()">📥 Export CSV</button>
             <button class="hist-act-btn clear-btn" onclick="clearHistoryLog()">🗑️ Clear Log</button>
           </div>
@@ -1079,20 +1107,20 @@
       const inputDisplay = document.querySelector('.input-display');
       errorEl.textContent = msg;
       inputDisplay.classList.add('error');
-      setTimeout(() => { errorEl.textContent = ''; inputDisplay.classList.remove('error'); }, 3000);
+      setTimeout(() => { errorEl.textContent = ''; inputDisplay.classList.remove('error'); }, 3500);
     }
 
     function appendNumber(num) { input.value += num; input.focus(); }
     function clearInput() { input.value = ''; input.focus(); }
     function backspaceInput() { input.value = input.value.slice(0, -1); input.focus(); }
 
-    // HISTORY LOGGING & CIRCULAR PAGINATION SYSTEM
+    // HISTORY LOGGING, SEARCH & CIRCULAR PAGINATION SYSTEM (MAX 200 ENTRIES)
     let currentHistFilter = 'all';
     let histCurrentPage = 1;
     let histItemsPerPage = 50;
 
     function addHistoryEntry(num, stage, action) {
-      const history = JSON.parse(localStorage.getItem('queueHistory') || '[]');
+      let history = JSON.parse(localStorage.getItem('queueHistory') || '[]');
       const now = new Date();
       const entry = {
         id: Date.now() + '-' + Math.random().toString(36).substr(2, 4),
@@ -1103,7 +1131,18 @@
         dateStr: now.toLocaleDateString()
       };
       history.unshift(entry);
+
+      // Automatically cap history log at 200 entries by removing oldest overflow entries
+      if (history.length > 200) {
+        history = history.slice(0, 200);
+      }
+
       localStorage.setItem('queueHistory', JSON.stringify(history));
+      renderHistory();
+    }
+
+    function handleHistSearch() {
+      histCurrentPage = 1;
       renderHistory();
     }
 
@@ -1123,10 +1162,24 @@
       document.getElementById('hist-cnt-ready').textContent = countReady;
       document.getElementById('hist-cnt-done').textContent = countDone;
 
-      // Filter entries
-      const filtered = currentHistFilter === 'all' 
+      // Category Filtering
+      let filtered = currentHistFilter === 'all' 
         ? history 
         : history.filter(h => h.stage === currentHistFilter);
+
+      // Search Query Filtering
+      const searchEl = document.getElementById('histSearchInput');
+      const searchQuery = searchEl ? searchEl.value.trim().toLowerCase() : '';
+
+      if (searchQuery) {
+        filtered = filtered.filter(h => 
+          h.num.toLowerCase().includes(searchQuery) ||
+          h.action.toLowerCase().includes(searchQuery) ||
+          h.timestamp.toLowerCase().includes(searchQuery) ||
+          h.dateStr.toLowerCase().includes(searchQuery) ||
+          h.stage.toLowerCase().includes(searchQuery)
+        );
+      }
 
       const totalItems = filtered.length;
       const totalPages = Math.ceil(totalItems / histItemsPerPage) || 1;
@@ -1135,7 +1188,8 @@
       if (histCurrentPage < 1) histCurrentPage = 1;
 
       if (totalItems === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-hist">No history logs recorded for this category</td></tr>';
+        const emptyMsg = searchQuery ? 'No history matching your search query' : 'No history logs recorded for this category';
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-hist">${emptyMsg}</td></tr>`;
         document.getElementById('hist-range-start').textContent = '0';
         document.getElementById('hist-range-end').textContent = '0';
         document.getElementById('hist-total-items').textContent = '0';
@@ -1195,7 +1249,7 @@
       // Prev Page ‹
       html += `<button class="hist-circle-btn" onclick="goToHistPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} title="Previous Page">‹</button>`;
 
-      // Page numbers algorithm (matching « ‹ 1 2 3 ... 18 › » design inspo)
+      // Page numbers algorithm
       const pageNumbers = getPageNumbersList(currentPage, totalPages);
 
       pageNumbers.forEach(p => {
@@ -1357,7 +1411,7 @@
       } catch (err) { console.error('Failed to parse saved state:', err); }
     }
 
-    // Add Order Logic
+    // Add Order Logic (Order Number Treated as Unique ID)
     function addOrder(status) {
       const rawNum = input.value.trim();
       if (!rawNum) return;
@@ -1370,15 +1424,24 @@
 
       const num = String(parsedVal).padStart(4, '0');
 
+      // 1. Check duplicate in Preparing Order
       const preparingCards = Array.from(document.querySelectorAll('#list-preparing .card-number'));
       if (preparingCards.some(card => card.textContent === `#${num}`)) {
         showError(`Order #${num} is already preparing!`);
         return;
       }
 
+      // 2. Check duplicate in Order Ready
       const readyCards = Array.from(document.querySelectorAll('#list-ready .card-number'));
       if (readyCards.some(card => card.textContent === `#${num}`)) {
         showError(`Order #${num} is already ready!`);
+        return;
+      }
+
+      // 3. Check duplicate in History Log (Unique ID validation across log)
+      const history = JSON.parse(localStorage.getItem('queueHistory') || '[]');
+      if (history.some(h => h.num === num)) {
+        showError(`Order #${num} already exists in history!`);
         return;
       }
 

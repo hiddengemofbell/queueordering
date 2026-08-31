@@ -1,4 +1,4 @@
-const CACHE_NAME = 'queue-system-cache-v13';
+const CACHE_NAME = 'queue-system-cache-v14';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

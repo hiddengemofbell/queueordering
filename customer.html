@@ -261,12 +261,7 @@
       NOW SERVING
     </div>
     
-    <div class="header-controls">
-      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">
-        🌙 Dark
-      </button>
-      <div class="live-clock" id="liveClock">--:--:--</div>
-    </div>
+    <div class="live-clock" id="liveClock">--:--:--</div>
   </header>
 
   <!-- Main Board Display -->
@@ -297,23 +292,12 @@
   </div>
 
   <script>
-    // Theme Switcher Logic
+    // Theme Sync Logic
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
-      const btn = document.getElementById('themeToggleBtn');
-      if (btn) {
-        btn.innerHTML = theme === 'light' ? '☀️ Light' : '🌙 Dark';
-      }
-      localStorage.setItem('appTheme', theme);
     }
 
-    function toggleTheme() {
-      const current = localStorage.getItem('appTheme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
-    }
-
-    // Apply initial saved theme
+    // Apply initial saved theme from staff settings
     applyTheme(localStorage.getItem('appTheme') || 'dark');
 
     // Register Service Worker for PWA Offline Support
@@ -417,6 +401,11 @@
       const channel = new BroadcastChannel('queue_channel');
       channel.onmessage = (event) => {
         if (event.data) renderDisplay(event.data);
+      };
+
+      const themeChannel = new BroadcastChannel('theme_channel');
+      themeChannel.onmessage = (event) => {
+        if (event.data) applyTheme(event.data);
       };
     }
 

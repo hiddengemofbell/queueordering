@@ -960,6 +960,10 @@
         btn.innerHTML = theme === 'light' ? '☀️ Light' : '🌙 Dark';
       }
       localStorage.setItem('appTheme', theme);
+      if ('BroadcastChannel' in window) {
+        const themeChannel = new BroadcastChannel('theme_channel');
+        themeChannel.postMessage(theme);
+      }
     }
 
     function toggleTheme() {

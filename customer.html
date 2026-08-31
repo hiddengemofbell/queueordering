@@ -82,31 +82,6 @@
       fill: var(--color-ready);
     }
 
-    .header-controls {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .theme-toggle-btn {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-    }
-
-    .theme-toggle-btn:hover {
-      border-color: var(--text-muted);
-    }
-
     .live-clock {
       font-size: 1.4rem;
       color: var(--text-main);
@@ -292,13 +267,13 @@
   </div>
 
   <script>
-    // Theme Sync Logic
+    // Customer Display Theme Sync Logic
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
     }
 
-    // Apply initial saved theme from staff settings
-    applyTheme(localStorage.getItem('appTheme') || 'dark');
+    // Apply initial customer theme set by staff
+    applyTheme(localStorage.getItem('customerTheme') || 'dark');
 
     // Register Service Worker for PWA Offline Support
     if ('serviceWorker' in navigator) {
@@ -396,14 +371,14 @@
       }
     }
 
-    // Real-Time BroadcastChannel Listener
+    // Real-Time BroadcastChannel Listeners
     if ('BroadcastChannel' in window) {
       const channel = new BroadcastChannel('queue_channel');
       channel.onmessage = (event) => {
         if (event.data) renderDisplay(event.data);
       };
 
-      const themeChannel = new BroadcastChannel('theme_channel');
+      const themeChannel = new BroadcastChannel('customer_theme_channel');
       themeChannel.onmessage = (event) => {
         if (event.data) applyTheme(event.data);
       };
@@ -412,7 +387,7 @@
     // Fallback Storage Event Listener
     window.addEventListener('storage', (e) => {
       if (e.key === 'queueState') syncFromLocalStorage();
-      if (e.key === 'appTheme') applyTheme(e.newValue || 'dark');
+      if (e.key === 'customerTheme') applyTheme(e.newValue || 'dark');
     });
 
     syncFromLocalStorage();

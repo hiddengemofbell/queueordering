@@ -149,16 +149,22 @@
     .header-right {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .theme-controls-group {
+      display: flex;
+      gap: 6px;
     }
 
     .theme-toggle-btn {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 6px 14px;
+      padding: 6px 12px;
       border-radius: 8px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -800,9 +806,14 @@
     </div>
 
     <div class="header-right">
-      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">
-        🌙 Dark
-      </button>
+      <div class="theme-controls-group">
+        <button class="theme-toggle-btn" id="staffThemeBtn" onclick="toggleStaffTheme()" title="Toggle Staff Panel Theme">
+          🛠️ Staff: 🌙 Dark
+        </button>
+        <button class="theme-toggle-btn" id="custThemeBtn" onclick="toggleCustomerTheme()" title="Toggle Customer TV Display Theme">
+          📺 TV: 🌙 Dark
+        </button>
+      </div>
       <button class="sound-btn active" id="soundBtn" onclick="toggleSound()">
         🔔 Chime: ON
       </button>
@@ -952,28 +963,43 @@
   </div>
 
   <script>
-    // Theme Switcher Logic
-    function applyTheme(theme) {
+    // Independent Dual Theme Controls (Staff UI & Customer TV Display)
+    function applyStaffTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
-      const btn = document.getElementById('themeToggleBtn');
+      const btn = document.getElementById('staffThemeBtn');
       if (btn) {
-        btn.innerHTML = theme === 'light' ? '☀️ Light' : '🌙 Dark';
+        btn.innerHTML = theme === 'light' ? '🛠️ Staff: ☀️ Light' : '🛠️ Staff: 🌙 Dark';
       }
-      localStorage.setItem('appTheme', theme);
+      localStorage.setItem('staffTheme', theme);
+    }
+
+    function toggleStaffTheme() {
+      const current = localStorage.getItem('staffTheme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      applyStaffTheme(next);
+    }
+
+    function applyCustomerTheme(theme) {
+      const btn = document.getElementById('custThemeBtn');
+      if (btn) {
+        btn.innerHTML = theme === 'light' ? '📺 TV: ☀️ Light' : '📺 TV: 🌙 Dark';
+      }
+      localStorage.setItem('customerTheme', theme);
       if ('BroadcastChannel' in window) {
-        const themeChannel = new BroadcastChannel('theme_channel');
+        const themeChannel = new BroadcastChannel('customer_theme_channel');
         themeChannel.postMessage(theme);
       }
     }
 
-    function toggleTheme() {
-      const current = localStorage.getItem('appTheme') || 'dark';
+    function toggleCustomerTheme() {
+      const current = localStorage.getItem('customerTheme') || 'dark';
       const next = current === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
+      applyCustomerTheme(next);
     }
 
-    // Apply initial saved theme
-    applyTheme(localStorage.getItem('appTheme') || 'dark');
+    // Apply initial saved themes
+    applyStaffTheme(localStorage.getItem('staffTheme') || 'dark');
+    applyCustomerTheme(localStorage.getItem('customerTheme') || 'dark');
 
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
@@ -1457,7 +1483,8 @@
         const saved = localStorage.getItem('queueState');
         if (saved) syncCustomerView(JSON.parse(saved));
       }
-      if (e.key === 'appTheme') applyTheme(e.newValue || 'dark');
+      if (e.key === 'staffTheme') applyStaffTheme(e.newValue || 'dark');
+      if (e.key === 'customerTheme') applyCustomerTheme(e.newValue || 'dark');
     });
 
     // Initial State Restoration & History Render

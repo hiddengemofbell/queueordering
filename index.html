@@ -44,17 +44,31 @@
       user-select: none;
     }
 
-    /* Header & Navigation Bar */
-    header {
-      background: var(--panel-bg);
-      padding: 12px 24px;
+    .header-left {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--border-color);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      gap: 14px;
       flex-wrap: wrap;
-      gap: 12px;
+    }
+
+    .shortcut-btn-customer {
+      background: linear-gradient(135deg, #10b981, #047857);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .shortcut-btn-customer:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
     }
 
     .nav-tabs {
@@ -512,22 +526,24 @@
 
   <!-- Navigation & Header Bar -->
   <header>
-    <div class="nav-tabs">
-      <button class="tab-btn active" id="tab-staff" onclick="switchView('staff')">
-        🛠️ Staff Control Panel
-      </button>
-      <button class="tab-btn" id="tab-customer" onclick="switchView('customer')">
-        📺 Customer Display Board
-      </button>
+    <div class="header-left">
+      <a href="customer.html" target="_blank" class="shortcut-btn-customer">
+        📺 Open Customer Display ↗
+      </a>
+      <div class="nav-tabs">
+        <button class="tab-btn active" id="tab-staff" onclick="switchView('staff')">
+          🛠️ Staff Mode
+        </button>
+        <button class="tab-btn" id="tab-customer" onclick="switchView('customer')">
+          📺 Customer View
+        </button>
+      </div>
     </div>
 
     <div class="header-right">
       <button class="sound-btn active" id="soundBtn" onclick="toggleSound()">
         🔔 Chime: ON
       </button>
-      <a href="customer.html" target="_blank" class="popout-btn">
-        Pop-out Window ↗
-      </a>
       <div class="live-clock" id="liveClock">--:--:--</div>
     </div>
   </header>

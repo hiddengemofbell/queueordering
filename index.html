@@ -507,7 +507,7 @@
     .hist-act-btn.clear-btn:hover { background: rgba(239, 68, 68, 0.25); }
 
     .history-table-wrapper {
-      max-height: 320px;
+      max-height: 380px;
       overflow-y: auto;
       border-radius: 10px;
       border: 1px solid var(--border-color);
@@ -556,6 +556,64 @@
     .badge-done { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
 
     .empty-hist { text-align: center; color: #64748b; padding: 30px 0 !important; }
+
+    /* HISTORY PAGINATION STYLES */
+    .history-pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .hist-page-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hist-page-select {
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .hist-nav-btn {
+      background: #334155;
+      color: #fff;
+      border: 1px solid var(--border-color);
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .hist-nav-btn:hover:not(:disabled) {
+      background: #475569;
+    }
+
+    .hist-nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .hist-page-num {
+      font-weight: 700;
+      color: #f8fafc;
+      padding: 0 4px;
+    }
 
     /* 2. CUSTOMER TV VIEW STYLES */
     .customer-container {
@@ -776,6 +834,26 @@
             </tbody>
           </table>
         </div>
+
+        <!-- History Pagination Controls -->
+        <div class="history-pagination">
+          <div class="hist-page-info">
+            Showing <span id="hist-range-start">0</span>–<span id="hist-range-end">0</span> of <span id="hist-total-items">0</span> entries
+          </div>
+          <div class="hist-page-controls">
+            <label for="histPageSize">Per page:</label>
+            <select id="histPageSize" class="hist-page-select" onchange="changeHistPageSize(this.value)">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+            <button class="hist-nav-btn" id="histPrevBtn" onclick="changeHistPage(-1)" disabled>◄ Prev</button>
+            <span class="hist-page-num" id="histPageNumDisplay">Page 1 of 1</span>
+            <button class="hist-nav-btn" id="histNextBtn" onclick="changeHistPage(1)" disabled>Next ►</button>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -891,8 +969,10 @@
     function clearInput() { input.value = ''; input.focus(); }
     function backspaceInput() { input.value = input.value.slice(0, -1); input.focus(); }
 
-    // HISTORY LOGGING SYSTEM
+    // HISTORY LOGGING & PAGINATION SYSTEM
     let currentHistFilter = 'all';
+    let histCurrentPage = 1;
+    let histItemsPerPage = 10;
 
     function addHistoryEntry(num, stage, action) {
       const history = JSON.parse(localStorage.getItem('queueHistory') || '[]');
@@ -915,7 +995,7 @@
       const tbody = document.getElementById('historyTableBody');
       if (!tbody) return;
 
-      // Update counters
+      // Update category counters
       const countAll = history.length;
       const countPrep = history.filter(h => h.stage === 'prepared').length;
       const countReady = history.filter(h => h.stage === 'ready').length;
@@ -931,12 +1011,37 @@
         ? history 
         : history.filter(h => h.stage === currentHistFilter);
 
-      if (filtered.length === 0) {
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / histItemsPerPage) || 1;
+
+      if (histCurrentPage > totalPages) histCurrentPage = totalPages;
+      if (histCurrentPage < 1) histCurrentPage = 1;
+
+      if (totalItems === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="empty-hist">No history logs recorded for this category</td></tr>';
+        document.getElementById('hist-range-start').textContent = '0';
+        document.getElementById('hist-range-end').textContent = '0';
+        document.getElementById('hist-total-items').textContent = '0';
+        document.getElementById('histPageNumDisplay').textContent = 'Page 1 of 1';
+        document.getElementById('histPrevBtn').disabled = true;
+        document.getElementById('histNextBtn').disabled = true;
         return;
       }
 
-      tbody.innerHTML = filtered.map(item => {
+      // Slicing for Pagination
+      const startIndex = (histCurrentPage - 1) * histItemsPerPage;
+      const endIndex = Math.min(startIndex + histItemsPerPage, totalItems);
+      const paginated = filtered.slice(startIndex, endIndex);
+
+      document.getElementById('hist-range-start').textContent = startIndex + 1;
+      document.getElementById('hist-range-end').textContent = endIndex;
+      document.getElementById('hist-total-items').textContent = totalItems;
+      document.getElementById('histPageNumDisplay').textContent = `Page ${histCurrentPage} of ${totalPages}`;
+
+      document.getElementById('histPrevBtn').disabled = histCurrentPage <= 1;
+      document.getElementById('histNextBtn').disabled = histCurrentPage >= totalPages;
+
+      tbody.innerHTML = paginated.map(item => {
         let badgeClass = 'badge-prepared';
         let stageLabel = '⏳ Prepared';
 
@@ -962,8 +1067,20 @@
 
     function filterHistory(stage) {
       currentHistFilter = stage;
+      histCurrentPage = 1;
       document.querySelectorAll('.hist-filter-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById(`hist-filter-${stage}`).classList.add('active');
+      renderHistory();
+    }
+
+    function changeHistPage(direction) {
+      histCurrentPage += direction;
+      renderHistory();
+    }
+
+    function changeHistPageSize(size) {
+      histItemsPerPage = parseInt(size, 10) || 10;
+      histCurrentPage = 1;
       renderHistory();
     }
 
@@ -992,6 +1109,7 @@
     function clearHistoryLog() {
       if (confirm('Are you sure you want to clear all order history logs?')) {
         localStorage.removeItem('queueHistory');
+        histCurrentPage = 1;
         renderHistory();
       }
     }

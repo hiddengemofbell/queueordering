@@ -46,10 +46,32 @@
       background: var(--panel-bg);
       padding: 14px 24px;
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border-color);
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-customer-view {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-customer-view:hover {
+      background: rgba(16, 185, 129, 0.3);
+      color: #fff;
+      transform: translateY(-1px);
     }
 
     .live-clock {
@@ -390,6 +412,9 @@
 
   <!-- Header -->
   <header>
+    <a href="customer.html" target="_blank" class="btn-customer-view">
+      📺 Open Customer Display
+    </a>
     <div class="live-clock" id="liveClock">--:--:--</div>
   </header>
 
@@ -518,6 +543,9 @@
       input.focus();
     }
 
+    // BroadcastChannel for instant real-time cross-window sync
+    const bcChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('queue_channel') : null;
+
     // Offline State Persistence using localStorage
     function saveState() {
       const state = {
@@ -542,6 +570,11 @@
       state.ready.reverse();
 
       localStorage.setItem('queueState', JSON.stringify(state));
+
+      // Broadcast real-time update to customer display panel
+      if (bcChannel) {
+        bcChannel.postMessage(state);
+      }
     }
 
     function loadState() {

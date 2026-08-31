@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Order Board</title>
+  
+  <!-- PWA Meta Tags & Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1e293b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --panel-bg: #111827;
+      --border-color: #1f2937;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      
+      --color-preparing: #f59e0b;
+      --color-preparing-gradient: linear-gradient(135deg, #d97706, #92400e);
+      --color-ready: #10b981;
+      --color-ready-gradient: linear-gradient(135deg, #059669, #047857);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Header */
+    header {
+      background: var(--panel-bg);
+      padding: 20px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border-color);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+
+    .brand svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--color-ready);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .sound-toggle {
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: #9ca3af;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .sound-toggle.active {
+      color: #34d399;
+      border-color: #059669;
+      background: rgba(5, 150, 105, 0.15);
+    }
+
+    .live-clock {
+      font-size: 1.4rem;
+      color: #f3f4f6;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      background: #1f2937;
+      padding: 6px 18px;
+      border-radius: 10px;
+      border: 1px solid #374151;
+    }
+
+    /* Main TV Display Board Layout */
+    .board-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 24px;
+      padding: 24px 36px;
+      height: calc(100vh - 85px);
+    }
+
+    .column {
+      background: var(--panel-bg);
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .col-header {
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .preparing-header { background: var(--color-preparing-gradient); }
+    .ready-header { background: var(--color-ready-gradient); }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.25);
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .number-grid {
+      flex: 1;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      align-content: start;
+      overflow-y: auto;
+    }
+
+    .ready-column .number-grid {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      margin: auto;
+      text-align: center;
+      color: #4b5563;
+      font-size: 1.3rem;
+      font-weight: 600;
+      padding: 100px 0;
+    }
+
+    .card {
+      background: #090d16;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+
+    .preparing-card {
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .preparing-card .card-number {
+      color: #fbbf24;
+      font-size: 3.2rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .ready-card {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: linear-gradient(180deg, #090d16 0%, #064e3b 140%);
+      animation: pulseGlow 1.5s infinite alternate ease-in-out, popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .ready-card .card-number {
+      color: #34d399;
+      font-size: 3.8rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
+    }
+
+    .card-time {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+      to { box-shadow: 0 0 25px rgba(16, 185, 129, 0.6); }
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TV Header -->
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-2.33 4.67-3.77 7-3.77s7 1.44 7 3.77V19z"/>
+      </svg>
+      NOW SERVING
+    </div>
+    
+    <div class="header-controls">
+      <button class="sound-toggle active" id="soundBtn" onclick="toggleSound()">
+        <span id="soundIcon">🔔</span> Sound Chime: ON
+      </button>
+      <div class="live-clock" id="liveClock">--:--:--</div>
+    </div>
+  </header>
+
+  <!-- Main Board Display -->
+  <div class="board-container">
+    
+    <!-- Preparing Orders Column -->
+    <div class="column preparing-column">
+      <div class="col-header preparing-header">
+        <span>Preparing Order</span>
+        <span class="badge" id="count-preparing">0</span>
+      </div>
+      <div class="number-grid" id="list-preparing">
+        <div class="empty-state">No orders preparing</div>
+      </div>
+    </div>
+
+    <!-- Order Ready Column -->
+    <div class="column ready-column">
+      <div class="col-header ready-header">
+        <span>Order Ready</span>
+        <span class="badge" id="count-ready">0</span>
+      </div>
+      <div class="number-grid" id="list-ready">
+        <div class="empty-state">No orders ready</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Register Service Worker for PWA Offline Support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('[PWA Customer] ServiceWorker registered:', reg.scope))
+          .catch(err => console.error('[PWA Customer] ServiceWorker registration failed:', err));
+      });
+    }
+
+    // Live Clock Update
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Sound Chime Logic (Web Audio API - No external files needed)
+    let soundEnabled = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('soundBtn');
+      if (soundEnabled) {
+        btn.className = 'sound-toggle active';
+        btn.innerHTML = '<span>🔔</span> Sound Chime: ON';
+        playChime(); // Play test chime
+      } else {
+        btn.className = 'sound-toggle';
+        btn.innerHTML = '<span>🔕</span> Sound Chime: OFF';
+      }
+    }
+
+    function playChime() {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        // Pleasant Two-Tone Bell Chime (E5 -> G5)
+        const now = audioCtx.currentTime;
+        
+        // Note 1
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(659.25, now); // E5
+        gain1.gain.setValueAtTime(0.3, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.8);
+
+        // Note 2
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(783.99, now + 0.25); // G5
+        gain2.gain.setValueAtTime(0.4, now + 0.25);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.25);
+        osc2.stop(now + 1.2);
+      } catch (err) {
+        console.warn('Audio chime error:', err);
+      }
+    }
+
+    // State Synchronization Logic
+    let prevReadyCount = 0;
+
+    function renderDisplay(state) {
+      if (!state) return;
+
+      const preparingList = document.getElementById('list-preparing');
+      const readyList = document.getElementById('list-ready');
+
+      // 1. Render Preparing Orders
+      if (state.preparing && Array.isArray(state.preparing)) {
+        if (state.preparing.length === 0) {
+          preparingList.innerHTML = '<div class="empty-state">No orders preparing</div>';
+        } else {
+          preparingList.innerHTML = '';
+          state.preparing.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card preparing-card';
+            card.innerHTML = `
+              <span class="card-number">#${item.num}</span>
+              <span class="card-time">Started at ${item.timeStr}</span>
+            `;
+            preparingList.appendChild(card);
+          });
+        }
+        document.getElementById('count-preparing').textContent = state.preparing.length;
+      }
+
+      // 2. Render Order Ready
+      if (state.ready && Array.isArray(state.ready)) {
+        if (state.ready.length === 0) {
+          readyList.innerHTML = '<div class="empty-state">No orders ready</div>';
+        } else {
+          readyList.innerHTML = '';
+          state.ready.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card ready-card';
+            card.innerHTML = `
+              <span class="card-number">#${item.num}</span>
+              <span class="card-time">Ready since ${item.timeStr}</span>
+            `;
+            readyList.appendChild(card);
+          });
+        }
+        document.getElementById('count-ready').textContent = state.ready.length;
+
+        // Play chime if a new order entered Ready
+        if (state.ready.length > prevReadyCount) {
+          playChime();
+        }
+        prevReadyCount = state.ready.length;
+      }
+    }
+
+    function syncFromLocalStorage() {
+      const saved = localStorage.getItem('queueState');
+      if (saved) {
+        try {
+          renderDisplay(JSON.parse(saved));
+        } catch (e) {
+          console.error('State parse error:', e);
+        }
+      }
+    }
+
+    // Real-Time BroadcastChannel Listener
+    if ('BroadcastChannel' in window) {
+      const channel = new BroadcastChannel('queue_channel');
+      channel.onmessage = (event) => {
+        if (event.data) {
+          renderDisplay(event.data);
+        }
+      };
+    }
+
+    // Fallback Storage Event Listener
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'queueState') {
+        syncFromLocalStorage();
+      }
+    });
+
+    // Initial Load
+    syncFromLocalStorage();
+  </script>
+</body>
+</html>

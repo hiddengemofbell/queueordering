@@ -1,7 +1,8 @@
-const CACHE_NAME = 'queue-system-cache-v1';
+const CACHE_NAME = 'queue-system-cache-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './customer.html',
   './manifest.json',
   './icon.svg',
   './icon-192.png',

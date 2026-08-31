@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Queue Calling System</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --card-bg: #0f172a;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --color-preparing: #f59e0b;
+      --color-ready: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      background: var(--panel-bg);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .live-clock {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Main Content Layout */
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 960px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Control Panel (Keypad & Call Actions) */
+    .control-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: fit-content;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    .input-display {
+      background: #0f172a;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 16px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .input-display:focus-within {
+      border-color: var(--color-ready);
+    }
+
+    .input-display.error {
+      border-color: #ef4444 !important;
+      animation: shake 0.3s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .input-display input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 2.5rem;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .input-display input::placeholder {
+      color: #475569;
+      font-weight: 400;
+    }
+
+    .error-msg {
+      color: #ef4444;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+      min-height: 1.2rem;
+      transition: opacity 0.2s;
+    }
+
+    /* Keypad Grid */
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .key-btn {
+      background: #334155;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      padding: 16px 0;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .key-btn:hover {
+      background: #475569;
+    }
+
+    .key-btn:active {
+      transform: scale(0.96);
+      background: #1e293b;
+    }
+
+    .key-btn.btn-action {
+      background: #0f172a;
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+
+    .key-btn.btn-action:hover {
+      background: #1e293b;
+      color: #fff;
+    }
+
+    .key-btn.btn-clear {
+      color: #ef4444;
+    }
+
+    /* Calling Action Buttons */
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .call-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    .call-btn:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+
+    .call-btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-preparing { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .btn-ready { background: linear-gradient(135deg, #10b981, #047857); }
+
+    /* Display Board */
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .board {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .column {
+      background: var(--panel-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 550px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    }
+
+    .col-header {
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .preparing-header { background: linear-gradient(135deg, #d97706, #b45309); }
+    .ready-header { background: linear-gradient(135deg, #059669, #047857); }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.25);
+      padding: 4px 12px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .number-list {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+      max-height: 70vh;
+    }
+
+    .empty-state {
+      margin: auto;
+      text-align: center;
+      color: #64748b;
+      font-size: 1rem;
+      user-select: none;
+      padding: 40px 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: #64748b;
+      background: #182234;
+      transform: scale(1.02);
+    }
+
+    .card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-number {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .ready-card .card-number {
+      color: #34d399;
+      text-shadow: 0 0 12px rgba(52, 211, 153, 0.3);
+    }
+
+    .preparing-card .card-number {
+      color: #fbbf24;
+    }
+
+    .card-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .card-action-hint {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .preparing-card .card-action-hint {
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .preparing-card:hover .card-action-hint {
+      background: rgba(251, 191, 36, 0.25);
+    }
+
+    .ready-card .card-action-hint {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .ready-card:hover .card-action-hint {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="live-clock" id="liveClock">--:--:--</div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <div class="main-container">
+    
+    <!-- Control Panel -->
+    <div class="control-panel">
+      <div class="panel-title">Order Entry</div>
+      
+      <!-- Number Display Input -->
+      <div class="input-display">
+        <input type="text" id="orderInput" placeholder="No." autofocus autocomplete="off" />
+      </div>
+      <div class="error-msg" id="errorMsg"></div>
+
+      <!-- On-Screen Keypad -->
+      <div class="keypad">
+        <button class="key-btn" onclick="appendNumber('1')">1</button>
+        <button class="key-btn" onclick="appendNumber('2')">2</button>
+        <button class="key-btn" onclick="appendNumber('3')">3</button>
+        
+        <button class="key-btn" onclick="appendNumber('4')">4</button>
+        <button class="key-btn" onclick="appendNumber('5')">5</button>
+        <button class="key-btn" onclick="appendNumber('6')">6</button>
+        
+        <button class="key-btn" onclick="appendNumber('7')">7</button>
+        <button class="key-btn" onclick="appendNumber('8')">8</button>
+        <button class="key-btn" onclick="appendNumber('9')">9</button>
+        
+        <button class="key-btn btn-action btn-clear" onclick="clearInput()">C</button>
+        <button class="key-btn" onclick="appendNumber('0')">0</button>
+        <button class="key-btn btn-action" onclick="backspaceInput()">⌫</button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="call-btn btn-preparing" onclick="addOrder('preparing')">
+          ⏳ Add to Preparing Order
+        </button>
+        <button class="call-btn btn-ready" onclick="addOrder('ready')">
+          🔔 Mark Order Ready
+        </button>
+      </div>
+    </div>
+
+    <!-- Display Board -->
+    <div class="board">
+      
+      <!-- Preparing Column -->
+      <div class="column">
+        <div class="col-header preparing-header">
+          <span>Preparing Order</span>
+          <span class="badge" id="count-preparing">0</span>
+        </div>
+        <div class="number-list" id="list-preparing">
+          <div class="empty-state">No orders preparing</div>
+        </div>
+      </div>
+
+      <!-- Order Ready Column -->
+      <div class="column">
+        <div class="col-header ready-header">
+          <span>Order Ready</span>
+          <span class="badge" id="count-ready">0</span>
+        </div>
+        <div class="number-list" id="list-ready">
+          <div class="empty-state">No orders ready</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Live Clock Update
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Keypad & Input Helpers
+    const input = document.getElementById('orderInput');
+
+    // Restrict input field to digits only
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^0-9]/g, '');
+    });
+
+    function showError(msg) {
+      const errorEl = document.getElementById('errorMsg');
+      const inputDisplay = document.querySelector('.input-display');
+      
+      errorEl.textContent = msg;
+      inputDisplay.classList.add('error');
+
+      setTimeout(() => {
+        errorEl.textContent = '';
+        inputDisplay.classList.remove('error');
+      }, 3000);
+    }
+
+    function appendNumber(num) {
+      input.value += num;
+      input.focus();
+    }
+
+    function clearInput() {
+      input.value = '';
+      input.focus();
+    }
+
+    function backspaceInput() {
+      input.value = input.value.slice(0, -1);
+      input.focus();
+    }
+
+    // Add Order to Preparing or Ready
+    function addOrder(status) {
+      const rawNum = input.value.trim();
+      if (!rawNum) return;
+
+      const parsedVal = parseInt(rawNum, 10);
+      if (isNaN(parsedVal) || parsedVal < 0 || rawNum.includes('-')) {
+        showError('Negative numbers not allowed');
+        return;
+      }
+
+      const num = String(parsedVal).padStart(4, '0');
+
+      // Check for duplicates with specific status messages
+      const preparingCards = Array.from(document.querySelectorAll('#list-preparing .card-number'));
+      if (preparingCards.some(card => card.textContent === `#${num}`)) {
+        showError(`Order #${num} is already preparing!`);
+        return;
+      }
+
+      const readyCards = Array.from(document.querySelectorAll('#list-ready .card-number'));
+      if (readyCards.some(card => card.textContent === `#${num}`)) {
+        showError(`Order #${num} is already ready!`);
+        return;
+      }
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      if (status === 'preparing') {
+        createPreparingCard(num, timeStr);
+      } else {
+        createReadyCard(num, timeStr);
+      }
+
+      // Reset input
+      input.value = '';
+      input.focus();
+    }
+
+    function createPreparingCard(num, timeStr) {
+      const list = document.getElementById('list-preparing');
+      removeEmptyState('preparing');
+
+      const card = document.createElement('div');
+      card.className = 'card preparing-card';
+      card.innerHTML = `
+        <div class="card-info">
+          <span class="card-number">#${num}</span>
+          <span class="card-time">Started at ${timeStr}</span>
+        </div>
+        <span class="card-action-hint">Move to Ready →</span>
+      `;
+
+      // Clicking preparing card moves it to Order Ready
+      card.onclick = () => {
+        card.remove();
+        updateCount('preparing');
+        checkEmptyState('preparing');
+
+        const moveTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        createReadyCard(num, moveTimeStr);
+      };
+
+      list.prepend(card);
+      updateCount('preparing');
+    }
+
+    function createReadyCard(num, timeStr) {
+      const list = document.getElementById('list-ready');
+      removeEmptyState('ready');
+
+      const card = document.createElement('div');
+      card.className = 'card ready-card';
+      card.innerHTML = `
+        <div class="card-info">
+          <span class="card-number">#${num}</span>
+          <span class="card-time">Ready since ${timeStr}</span>
+        </div>
+        <span class="card-action-hint">Done ✓</span>
+      `;
+
+      // Clicking ready card dismisses/completes the order
+      card.onclick = () => {
+        card.remove();
+        updateCount('ready');
+        checkEmptyState('ready');
+      };
+
+      list.prepend(card);
+      updateCount('ready');
+    }
+
+    function removeEmptyState(status) {
+      const list = document.getElementById(`list-${status}`);
+      const emptyState = list.querySelector('.empty-state');
+      if (emptyState) emptyState.remove();
+    }
+
+    function checkEmptyState(status) {
+      const list = document.getElementById(`list-${status}`);
+      if (list.querySelectorAll('.card').length === 0) {
+        list.innerHTML = `<div class="empty-state">No orders ${status}</div>`;
+      }
+    }
+
+    function updateCount(status) {
+      const list = document.getElementById(`list-${status}`);
+      const cards = list.querySelectorAll('.card');
+      document.getElementById(`count-${status}`).textContent = cards.length;
+    }
+
+    // Allow pressing Enter key to default add to Preparing Order
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        addOrder('preparing');
+      }
+    });
+  </script>
+</body>
+</html>

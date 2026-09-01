@@ -139,16 +139,379 @@
 
     .number-grid {
       flex: 1;
-      padding: 24px;
+      padding: 10px 14px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(2, 1fr);
+      grid-auto-rows: 74px;
+      gap: 6px;
       align-content: start;
       overflow-y: auto;
+      transition: all 0.3s ease;
     }
 
     .ready-column .number-grid {
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+      grid-template-columns: repeat(2, 1fr);
+      grid-auto-rows: 74px;
+    }
+
+    @media (max-width: 600px) {
+      .number-grid, .ready-column .number-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* -------------------------------------------------------------
+       PREPARING ORDER: UNTOUCHED STABLE RULES (EXACT MATCH TO YOUR PHOTO)
+       ------------------------------------------------------------- */
+    /* 1 ORDER: Centered in the middle with Jumbo TV Card */
+    .number-grid[data-count="1"] {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 24px !important;
+      height: 100% !important;
+    }
+    .number-grid[data-count="1"] .card {
+      width: 90% !important;
+      max-width: 500px !important;
+      height: 180px !important;
+      padding: 20px !important;
+      border-radius: 20px !important;
+    }
+    .number-grid[data-count="1"] .card-number {
+      font-size: clamp(4.5rem, 19cqw, 7.5rem) !important;
+      height: 110px !important;
+    }
+    .number-grid[data-count="1"] .card-time {
+      font-size: 1.2rem !important;
+      height: 30px !important;
+    }
+
+    /* 2 ORDERS (1 Full Row): Centered in column middle, 150px card height */
+    .number-grid[data-count="2"] {
+      align-content: center !important;
+      grid-auto-rows: 150px !important;
+      gap: 16px !important;
+      padding: 24px !important;
+      height: 100% !important;
+    }
+    .number-grid[data-count="2"] .card {
+      height: 150px !important;
+      padding: 14px 16px 10px 16px !important;
+      border-radius: 18px !important;
+    }
+    .number-grid[data-count="2"] .card-number {
+      font-size: clamp(3.8rem, 18cqw, 6.0rem) !important;
+      height: 98px !important;
+    }
+    .number-grid[data-count="2"] .card-time {
+      font-size: 1.1rem !important;
+      height: 26px !important;
+    }
+
+    /* 3 to 4 ORDERS (2 Full Rows): Centered in column middle, 135px card height */
+    .number-grid[data-count="3"],
+    .number-grid[data-count="4"] {
+      align-content: center !important;
+      grid-auto-rows: 135px !important;
+      gap: 16px !important;
+      padding: 20px !important;
+      height: 100% !important;
+    }
+    .number-grid[data-count="3"] .card,
+    .number-grid[data-count="4"] .card {
+      height: 135px !important;
+      padding: 12px 14px 8px 14px !important;
+      border-radius: 16px !important;
+    }
+    .number-grid[data-count="3"] .card-number,
+    .number-grid[data-count="4"] .card-number {
+      font-size: clamp(3.4rem, 17cqw, 5.2rem) !important;
+      height: 86px !important;
+    }
+    .number-grid[data-count="3"] .card-time,
+    .number-grid[data-count="4"] .card-time {
+      font-size: 1.05rem !important;
+      height: 24px !important;
+    }
+
+    /* 5 to 6 ORDERS (3 Full Rows - Your Photo!): Centered in column middle, 120px card height */
+    .number-grid[data-count="5"],
+    .number-grid[data-count="6"] {
+      align-content: center !important;
+      grid-auto-rows: 120px !important;
+      gap: 14px !important;
+      padding: 16px !important;
+      height: 100% !important;
+    }
+    .number-grid[data-count="5"] .card,
+    .number-grid[data-count="6"] .card {
+      height: 120px !important;
+      padding: 10px 14px 6px 14px !important;
+      border-radius: 14px !important;
+    }
+    .number-grid[data-count="5"] .card-number,
+    .number-grid[data-count="6"] .card-number {
+      font-size: clamp(3.0rem, 16cqw, 4.6rem) !important;
+      height: 76px !important;
+    }
+    .number-grid[data-count="5"] .card-time,
+    .number-grid[data-count="6"] .card-time {
+      font-size: 0.98rem !important;
+      height: 22px !important;
+    }
+
+    /* -------------------------------------------------------------
+       ORDER READY (#readyGrid): MAXIMIZED VERTICAL CARD & FONT DENSITY
+       ------------------------------------------------------------- */
+    /* Base Card Layout Protection (Guarantees Ready since is NEVER hidden) */
+    .card {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+    .card-number {
+      flex: 1 1 auto !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 0.95 !important;
+      font-weight: 900 !important;
+      width: 100% !important;
+    }
+    .card-time {
+      flex: 0 0 auto !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      white-space: nowrap !important;
+      width: 100% !important;
+    }
+
+    /* 1 ORDER */
+    #readyGrid[data-count="1"] {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 24px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="1"] .card {
+      width: 90% !important;
+      max-width: 520px !important;
+      height: 240px !important;
+      padding: 24px !important;
+      border-radius: 24px !important;
+    }
+    #readyGrid[data-count="1"] .card-number {
+      font-size: clamp(6.0rem, 23cqw, 9.2rem) !important;
+    }
+    #readyGrid[data-count="1"] .card-time {
+      font-size: 1.35rem !important;
+    }
+
+    /* 2 ORDERS (1 Row) */
+    #readyGrid[data-count="2"] {
+      align-content: center !important;
+      grid-auto-rows: 240px !important;
+      gap: 16px !important;
+      padding: 24px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="2"] .card {
+      height: 240px !important;
+      padding: 16px 18px 12px 18px !important;
+      border-radius: 22px !important;
+    }
+    #readyGrid[data-count="2"] .card-number {
+      font-size: clamp(5.6rem, 21cqw, 8.5rem) !important;
+    }
+    #readyGrid[data-count="2"] .card-time {
+      font-size: 1.25rem !important;
+    }
+
+    /* 3-4 ORDERS (2 Rows) */
+    #readyGrid[data-count="3"], #readyGrid[data-count="4"] {
+      align-content: center !important;
+      grid-auto-rows: 200px !important;
+      gap: 16px !important;
+      padding: 20px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="3"] .card, #readyGrid[data-count="4"] .card {
+      height: 200px !important;
+      padding: 14px 16px 10px 16px !important;
+      border-radius: 20px !important;
+    }
+    #readyGrid[data-count="3"] .card-number, #readyGrid[data-count="4"] .card-number {
+      font-size: clamp(5.0rem, 20cqw, 7.5rem) !important;
+    }
+    #readyGrid[data-count="3"] .card-time, #readyGrid[data-count="4"] .card-time {
+      font-size: 1.15rem !important;
+    }
+
+    /* 5-6 ORDERS (3 Rows) */
+    #readyGrid[data-count="5"], #readyGrid[data-count="6"] {
+      align-content: center !important;
+      grid-auto-rows: 175px !important;
+      gap: 14px !important;
+      padding: 16px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="5"] .card, #readyGrid[data-count="6"] .card {
+      height: 175px !important;
+      padding: 12px 14px 8px 14px !important;
+      border-radius: 18px !important;
+    }
+    #readyGrid[data-count="5"] .card-number, #readyGrid[data-count="6"] .card-number {
+      font-size: clamp(4.4rem, 19cqw, 6.6rem) !important;
+    }
+    #readyGrid[data-count="5"] .card-time, #readyGrid[data-count="6"] .card-time {
+      font-size: 1.1rem !important;
+    }
+
+    /* 7-8 ORDERS (4 Rows) */
+    #readyGrid[data-count="7"], #readyGrid[data-count="8"] {
+      align-content: center !important;
+      grid-auto-rows: 150px !important;
+      gap: 12px !important;
+      padding: 14px 16px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="7"] .card, #readyGrid[data-count="8"] .card {
+      height: 150px !important;
+      padding: 10px 12px 6px 12px !important;
+      border-radius: 16px !important;
+    }
+    #readyGrid[data-count="7"] .card-number, #readyGrid[data-count="8"] .card-number {
+      font-size: clamp(3.8rem, 18cqw, 5.8rem) !important;
+    }
+    #readyGrid[data-count="7"] .card-time, #readyGrid[data-count="8"] .card-time {
+      font-size: 1.02rem !important;
+    }
+
+    /* 9-10 ORDERS (5 Rows) */
+    #readyGrid[data-count="9"], #readyGrid[data-count="10"] {
+      align-content: center !important;
+      grid-auto-rows: 132px !important;
+      gap: 10px !important;
+      padding: 12px 14px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="9"] .card, #readyGrid[data-count="10"] .card {
+      height: 132px !important;
+      padding: 8px 10px 5px 10px !important;
+      border-radius: 14px !important;
+    }
+    #readyGrid[data-count="9"] .card-number, #readyGrid[data-count="10"] .card-number {
+      font-size: clamp(3.4rem, 17cqw, 5.0rem) !important;
+    }
+    #readyGrid[data-count="9"] .card-time, #readyGrid[data-count="10"] .card-time {
+      font-size: 0.94rem !important;
+    }
+
+    /* 11-12 ORDERS (6 Rows) */
+    #readyGrid[data-count="11"], #readyGrid[data-count="12"] {
+      align-content: center !important;
+      grid-auto-rows: 120px !important;
+      gap: 8px !important;
+      padding: 10px 12px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="11"] .card, #readyGrid[data-count="12"] .card {
+      height: 120px !important;
+      padding: 6px 10px 4px 10px !important;
+      border-radius: 14px !important;
+    }
+    #readyGrid[data-count="11"] .card-number, #readyGrid[data-count="12"] .card-number {
+      font-size: clamp(3.1rem, 16cqw, 4.6rem) !important;
+    }
+    #readyGrid[data-count="11"] .card-time, #readyGrid[data-count="12"] .card-time {
+      font-size: 0.88rem !important;
+    }
+
+    /* 13-14 ORDERS (7 Rows - Your Photo media_1788297459437.png!) */
+    #readyGrid[data-count="13"], #readyGrid[data-count="14"] {
+      align-content: center !important;
+      grid-auto-rows: 112px !important;
+      gap: 7px !important;
+      padding: 8px 12px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="13"] .card, #readyGrid[data-count="14"] .card {
+      height: 112px !important;
+      padding: 5px 8px 3px 8px !important;
+      border-radius: 12px !important;
+    }
+    #readyGrid[data-count="13"] .card-number, #readyGrid[data-count="14"] .card-number {
+      font-size: clamp(3.0rem, 16cqw, 4.4rem) !important;
+    }
+    #readyGrid[data-count="13"] .card-time, #readyGrid[data-count="14"] .card-time {
+      font-size: 0.85rem !important;
+    }
+
+    /* 15-16 ORDERS (8 Rows) */
+    #readyGrid[data-count="15"], #readyGrid[data-count="16"] {
+      align-content: center !important;
+      grid-auto-rows: 98px !important;
+      gap: 6px !important;
+      padding: 8px 10px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="15"] .card, #readyGrid[data-count="16"] .card {
+      height: 98px !important;
+      padding: 4px 8px 3px 8px !important;
+      border-radius: 12px !important;
+    }
+    #readyGrid[data-count="15"] .card-number, #readyGrid[data-count="16"] .card-number {
+      font-size: clamp(2.6rem, 15cqw, 3.8rem) !important;
+    }
+    #readyGrid[data-count="15"] .card-time, #readyGrid[data-count="16"] .card-time {
+      font-size: 0.80rem !important;
+    }
+
+    /* 17-18 ORDERS (9 Rows) */
+    #readyGrid[data-count="17"], #readyGrid[data-count="18"] {
+      align-content: start !important;
+      grid-auto-rows: 86px !important;
+      gap: 5px !important;
+      padding: 6px 10px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="17"] .card, #readyGrid[data-count="18"] .card {
+      height: 86px !important;
+      padding: 4px 6px 2px 6px !important;
+      border-radius: 10px !important;
+    }
+    #readyGrid[data-count="17"] .card-number, #readyGrid[data-count="18"] .card-number {
+      font-size: clamp(2.3rem, 14cqw, 3.3rem) !important;
+    }
+    #readyGrid[data-count="17"] .card-time, #readyGrid[data-count="18"] .card-time {
+      font-size: 0.76rem !important;
+    }
+
+    /* 19-20 ORDERS (10 Rows) */
+    #readyGrid[data-count="19"], #readyGrid[data-count="20"] {
+      align-content: start !important;
+      grid-auto-rows: 76px !important;
+      gap: 4px !important;
+      padding: 6px 10px !important;
+      height: 100% !important;
+    }
+    #readyGrid[data-count="19"] .card, #readyGrid[data-count="20"] .card {
+      height: 76px !important;
+      padding: 3px 6px 2px 6px !important;
+      border-radius: 8px !important;
+    }
+    #readyGrid[data-count="19"] .card-number, #readyGrid[data-count="20"] .card-number {
+      font-size: clamp(2.0rem, 13cqw, 2.9rem) !important;
+    }
+    #readyGrid[data-count="19"] .card-time, #readyGrid[data-count="20"] .card-time {
+      font-size: 0.72rem !important;
     }
 
     .empty-state {
@@ -164,19 +527,21 @@
     .card {
       background: var(--card-bg);
       border: 2px solid var(--border-color);
-      border-radius: 16px;
-      padding: 20px 14px;
+      border-radius: 12px;
+      padding: 6px 10px 4px 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       text-align: center;
       animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
       container-type: inline-size;
       width: 100%;
+      height: 74px;
       box-sizing: border-box;
       overflow: hidden;
+      flex-shrink: 0;
     }
 
     .preparing-card {
@@ -185,13 +550,18 @@
 
     .preparing-card .card-number {
       color: #d97706;
-      font-size: clamp(1.8rem, 17cqw, 3.8rem);
+      font-size: clamp(1.65rem, 13.5cqw, 2.8rem);
       font-weight: 900;
       letter-spacing: 0.5px;
-      line-height: 1.1;
+      line-height: 1.0;
+      white-space: nowrap;
       max-width: 100%;
-      overflow-wrap: break-word;
-      word-break: break-all;
+      margin: 0;
+      padding: 0;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     [data-theme="dark"] .preparing-card .card-number {
@@ -206,13 +576,18 @@
 
     .ready-card .card-number {
       color: #059669;
-      font-size: clamp(2.0rem, 20cqw, 4.4rem);
+      font-size: clamp(1.65rem, 13.5cqw, 2.9rem);
       font-weight: 900;
       letter-spacing: 0.5px;
-      line-height: 1.1;
+      line-height: 1.0;
+      white-space: nowrap;
       max-width: 100%;
-      overflow-wrap: break-word;
-      word-break: break-all;
+      margin: 0;
+      padding: 0;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     [data-theme="dark"] .ready-card .card-number {
@@ -221,10 +596,20 @@
     }
 
     .card-time {
-      font-size: 0.9rem;
+      font-size: 0.78rem;
       color: var(--text-muted);
-      margin-top: 6px;
-      font-weight: 500;
+      font-weight: 600;
+      line-height: 1.1;
+      margin: 0;
+      white-space: nowrap;
+      width: 100%;
+      text-align: center;
+      height: 19px;
+      flex-shrink: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     @keyframes pulseGlow {
@@ -337,6 +722,7 @@
       const readyList = document.getElementById('list-ready');
 
       if (state.preparing && Array.isArray(state.preparing)) {
+        preparingList.setAttribute('data-count', state.preparing.length);
         if (state.preparing.length === 0) {
           preparingList.innerHTML = '<div class="empty-state">No orders preparing</div>';
         } else {
@@ -355,6 +741,7 @@
       }
 
       if (state.ready && Array.isArray(state.ready)) {
+        readyList.setAttribute('data-count', state.ready.length);
         if (state.ready.length === 0) {
           readyList.innerHTML = '<div class="empty-state">No orders ready</div>';
         } else {

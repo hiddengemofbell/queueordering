@@ -774,29 +774,42 @@
 
     .cust-grid {
       flex: 1;
-      padding: 32px;
+      padding: 24px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 30px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+      gap: 20px;
       align-content: start;
       overflow-y: auto;
     }
 
     .cust-card {
       background: var(--card-bg);
-      border: 3px solid var(--border-color);
-      border-radius: 24px;
-      padding: 36px 30px;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px 14px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
       animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      container-type: inline-size;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
     }
 
     .cust-preparing-card { border-color: rgba(245, 158, 11, 0.4); }
-    .cust-preparing-card .cust-card-number { color: #d97706; font-size: 9.0rem; font-weight: 900; letter-spacing: 2px; line-height: 1.0; }
+    .cust-preparing-card .cust-card-number {
+      color: #d97706;
+      font-size: clamp(1.8rem, 17cqw, 3.8rem);
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-all;
+    }
     [data-theme="dark"] .cust-preparing-card .cust-card-number { color: #fbbf24; }
 
     .cust-ready-card {
@@ -807,18 +820,21 @@
 
     .cust-ready-card .cust-card-number {
       color: #059669;
-      font-size: 11.0rem;
+      font-size: clamp(2.0rem, 20cqw, 4.4rem);
       font-weight: 900;
-      letter-spacing: 2px;
-      line-height: 1.0;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-all;
     }
 
     [data-theme="dark"] .cust-ready-card .cust-card-number {
       color: #34d399;
-      text-shadow: 0 0 30px rgba(52, 211, 153, 0.7);
+      text-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
     }
 
-    .cust-card-time { font-size: 1.2rem; color: var(--text-muted); margin-top: 12px; font-weight: 600; }
+    .cust-card-time { font-size: 0.9rem; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
 
     /* CUSTOM POPUP MODAL OVERLAY STYLES */
     .modal-overlay {

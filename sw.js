@@ -1,4 +1,4 @@
-const CACHE_NAME = 'queue-system-cache-v44';
+const CACHE_NAME = 'queue-system-cache-v45';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -35,30 +35,52 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event - Serve from Cache First, Fallback to Network
+// Fetch Event
 self.addEventListener('fetch', (event) => {
-  // Only cache valid http/https requests, skip chrome-extension:// schemes
-  if (!(event.request.url.startsWith('http:') || event.request.url.startsWith('https:'))) {
+  // Cache API only supports GET requests. API writes and other requests must
+  // always reach the network.
+  if (event.request.method !== 'GET') {
     return;
   }
 
+  const url = new URL(event.request.url);
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return;
+  }
+
+  // HTML must be fresh when a staff member opens the customer display after a
+  // deployment. Keep its cached copy only as an offline fallback.
+  if (event.request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname === '/') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse.clone()));
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cachedPage = await caches.match(event.request);
+          if (cachedPage) return cachedPage;
+          return caches.match(url.pathname === '/customer.html' ? '/customer.html' : '/index.html');
+        })
+    );
+    return;
+  }
+
+  // Static assets can remain cache-first for fast, offline-capable loading.
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      if (cachedResponse) return cachedResponse;
       return fetch(event.request).then((networkResponse) => {
         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
         }
         const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
         return networkResponse;
       });
     }).catch(() => {
-      // Offline fallback
       return caches.match('/index.html');
     })
   );

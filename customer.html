@@ -115,15 +115,17 @@
     }
 
     .col-header {
-      padding: 24px 32px;
+      min-height: 132px;
+      padding: 28px 32px;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       color: #fff;
       font-weight: 900;
-      font-size: 2.2rem;
-      letter-spacing: 1px;
+      font-size: clamp(2.6rem, 4.5vw, 4.5rem);
+      letter-spacing: 1.5px;
       text-transform: uppercase;
+      text-align: center;
     }
 
     .preparing-header { background: var(--color-preparing-gradient); }
@@ -648,8 +650,7 @@
     <!-- Preparing Orders Column -->
     <div class="column preparing-column">
       <div class="col-header preparing-header">
-        <span>Preparing Order</span>
-        <span class="badge" id="count-preparing">0</span>
+        <span>Preparing</span>
       </div>
       <div class="number-grid" id="list-preparing">
         <div class="empty-state">No orders preparing</div>
@@ -660,7 +661,6 @@
     <div class="column ready-column">
       <div class="col-header ready-header">
         <span>Order Ready</span>
-        <span class="badge" id="count-ready">0</span>
       </div>
       <div class="number-grid" id="list-ready">
         <div class="empty-state">No orders ready</div>
@@ -742,7 +742,6 @@
             preparingList.appendChild(card);
           });
         }
-        document.getElementById('count-preparing').textContent = state.preparing.length;
       }
 
       if (state.ready && Array.isArray(state.ready)) {
@@ -761,7 +760,6 @@
             readyList.appendChild(card);
           });
         }
-        document.getElementById('count-ready').textContent = state.ready.length;
 
         if (state.ready.length > prevReadyCount) {
           playChime();

@@ -83,6 +83,13 @@
       fill: var(--color-ready);
     }
 
+    .brand img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: contain;
+    }
+
     .live-clock {
       font-size: 1.4rem;
       color: var(--text-main);
@@ -628,16 +635,43 @@
       from { transform: scale(0.8); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
+
+    #soundUnlockOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(15, 23, 42, 0.92);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      cursor: pointer;
+      text-align: center;
+      padding: 24px;
+    }
+
+    #soundUnlockOverlay .unlock-icon { font-size: 4rem; }
+    #soundUnlockOverlay .unlock-title { font-size: 1.6rem; font-weight: 800; }
+    #soundUnlockOverlay .unlock-sub { font-size: 1rem; opacity: 0.75; }
   </style>
 </head>
 <body>
 
+  <!-- One-time tap to unlock chime & voice announcements on this display.
+       Chrome silently blocks speechSynthesis on a tab that never received
+       a direct click, which this TV display otherwise never gets. -->
+  <div id="soundUnlockOverlay">
+    <div class="unlock-icon">🔊</div>
+    <div class="unlock-title">Tap Anywhere to Enable Sound</div>
+    <div class="unlock-sub">Required once so ready-order announcements can play on this display</div>
+  </div>
+
   <!-- TV Header -->
   <header>
     <div class="brand">
-      <svg viewBox="0 0 24 24">
-        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-2.33 4.67-3.77 7-3.77s7 1.44 7 3.77V19z"/>
-      </svg>
+      <img src="logo.png" alt="Gabita's Crispy Pata" />
       NOW SERVING
     </div>
     
@@ -705,20 +739,62 @@
         const now = audioCtx.currentTime;
         const osc1 = audioCtx.createOscillator(), gain1 = audioCtx.createGain();
         osc1.type = 'sine'; osc1.frequency.setValueAtTime(659.25, now);
-        gain1.gain.setValueAtTime(0.3, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        gain1.gain.setValueAtTime(0.6, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
         osc1.connect(gain1); gain1.connect(audioCtx.destination);
         osc1.start(now); osc1.stop(now + 0.8);
 
         const osc2 = audioCtx.createOscillator(), gain2 = audioCtx.createGain();
         osc2.type = 'sine'; osc2.frequency.setValueAtTime(783.99, now + 0.25);
-        gain2.gain.setValueAtTime(0.4, now + 0.25); gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        gain2.gain.setValueAtTime(0.8, now + 0.25); gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
         osc2.connect(gain2); gain2.connect(audioCtx.destination);
         osc2.start(now + 0.25); osc2.stop(now + 1.2);
       } catch (err) { console.warn('Audio chime error:', err); }
     }
 
+    // Voice Announcement Logic (Web Speech API)
+    let femaleVoice = null;
+    function pickFemaleVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices.length) return null;
+      const keywords = ['female', 'zira', 'samantha', 'victoria', 'karen', 'tessa', 'moira', 'fiona', 'susan', 'allison', 'ava', 'serena', 'jenny', 'aria', 'google us english', 'google uk english female'];
+      return voices.find(v => keywords.some(k => v.name.toLowerCase().includes(k)))
+        || voices.find(v => v.lang && v.lang.startsWith('en'))
+        || voices[0];
+    }
+    if ('speechSynthesis' in window) {
+      femaleVoice = pickFemaleVoice();
+      window.speechSynthesis.onvoiceschanged = () => { femaleVoice = pickFemaleVoice(); };
+    }
+
+    function speakOrderReady(num) {
+      if (!('speechSynthesis' in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        // Chrome bug: speak() called in the same tick as cancel() often silently
+        // fails with an "interrupted" error. A tiny delay avoids the race.
+        setTimeout(() => {
+          try {
+            const utter = new SpeechSynthesisUtterance(`Order number ${parseInt(num, 10)} is now ready.`);
+            utter.rate = 0.9;
+            utter.volume = 1;
+            if (femaleVoice) {
+              utter.voice = femaleVoice;
+              if (!/female|zira|samantha|victoria|karen|tessa|moira|fiona|susan|allison|ava|serena|jenny|aria/i.test(femaleVoice.name)) {
+                utter.pitch = 1.3;
+              }
+            } else {
+              utter.pitch = 1.3;
+            }
+            window.speechSynthesis.speak(utter);
+          } catch (err) { console.warn('Speech synthesis error:', err); }
+        }, 60);
+      } catch (err) { console.warn('Speech synthesis error:', err); }
+    }
+
     // State Synchronization Logic
     let prevReadyCount = 0;
+    let firstRender = true;
 
     function renderDisplay(state) {
       if (!state) return;
@@ -761,11 +837,15 @@
           });
         }
 
-        if (state.ready.length > prevReadyCount) {
+        if (!firstRender && state.ready.length > prevReadyCount) {
           playChime();
+          const newest = state.ready[state.ready.length - 1];
+          if (newest) speakOrderReady(newest.num);
         }
         prevReadyCount = state.ready.length;
       }
+
+      firstRender = false;
     }
 
     function syncFromLocalStorage() {
@@ -775,25 +855,18 @@
       }
     }
 
-    // 1. Real-Time Server-Sent Events (SSE) Listener (Multi-Device Network Sync)
-    if ('EventSource' in window) {
-      const sse = new EventSource('/events');
-      sse.addEventListener('queueState', (e) => {
-        try { renderDisplay(JSON.parse(e.data)); } catch (err) { console.error('SSE queueState parse error:', err); }
-      });
-      sse.addEventListener('customerTheme', (e) => {
-        try {
-          const data = JSON.parse(e.data);
-          if (data.theme) applyTheme(data.theme);
-        } catch (err) { console.error('SSE customerTheme parse error:', err); }
-      });
-    }
-
-    // 2. BroadcastChannel Listener (Same Device / Cross-Tab Sync)
+    // BroadcastChannel Listener (Same Device / Cross-Tab Sync)
     if ('BroadcastChannel' in window) {
       const channel = new BroadcastChannel('queue_channel');
       channel.onmessage = (event) => {
-        if (event.data) renderDisplay(event.data);
+        const data = event.data;
+        if (!data) return;
+        if (data.type === 'announce') {
+          playChime();
+          speakOrderReady(data.num);
+        } else {
+          renderDisplay(data);
+        }
       };
 
       const themeChannel = new BroadcastChannel('customer_theme_channel');
@@ -802,13 +875,25 @@
       };
     }
 
-    // 3. Fallback Storage Event Listener
+    // Fallback Storage Event Listener (other tabs on this device)
     window.addEventListener('storage', (e) => {
       if (e.key === 'queueState') syncFromLocalStorage();
       if (e.key === 'customerTheme') applyTheme(e.newValue || 'dark');
     });
 
     syncFromLocalStorage();
+
+    // One-time gesture to unlock audio/voice on this tab (see overlay above).
+    const soundUnlockOverlay = document.getElementById('soundUnlockOverlay');
+    soundUnlockOverlay.addEventListener('click', () => {
+      try { if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {}
+      try {
+        const unlockUtter = new SpeechSynthesisUtterance(' ');
+        unlockUtter.volume = 0;
+        window.speechSynthesis.speak(unlockUtter);
+      } catch (e) {}
+      soundUnlockOverlay.remove();
+    }, { once: true });
   </script>
 </body>
 </html>

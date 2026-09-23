@@ -9,10 +9,11 @@
 The **Queue Calling & Customer Display System** is a lightweight, high-performance Progressive Web Application (PWA) designed for store cashiers, kitchens, and customer waiting areas. It enables staff to call order numbers seamlessly while broadcasting real-time visual and audio notifications to a dedicated TV display board.
 
 ### **Key Technical Highlights**
-- **Architecture**: Single Page Application (SPA) built with pure HTML5, CSS3, and modern JavaScript ES6+.
-- **Real-Time Synchronization**: Multi-device network streaming via Server-Sent Events (SSE) and cross-tab `BroadcastChannel`.
+- **Architecture**: Single Page Application (SPA) built with pure HTML5, CSS3, and modern JavaScript ES6+. No backend/server required in production — the site is served as static files on Vercel.
+- **Real-Time Synchronization**: Instant sync between the Staff Control Panel and Customer TV Display via cross-tab `BroadcastChannel` + `localStorage`. This assumes both screens are open in the same browser on the same computer (e.g. a TV connected as an extended/mirrored display) — it does not sync across separate physical devices.
 - **Offline PWA Capability**: Web App Manifest (`manifest.json`) and Service Worker caching (`sw.js`) allowing installation on iPads, Android tablets, and PCs with full offline functionality.
-- **Client-Side Storage**: Fast `localStorage` persistence with zero mandatory backend setup.
+- **Client-Side Storage**: Fast `localStorage` persistence with zero backend setup.
+- **Voice & Chime Alerts**: Web Audio API two-tone chime plus a spoken "Order number X is now ready" announcement (Web Speech API) whenever an order becomes ready, with a manual 🔔 recall button per ready order to repeat the call.
 
 ---
 
@@ -64,18 +65,19 @@ The **Queue Calling & Customer Display System** is a lightweight, high-performan
 
 ## 📱 4. Client Onboarding & Setup Instructions
 
-### **A. Setting Up the Staff Control Panel (Tablet / Phone / PC)**
-1. Open the Staff link: `https://queueordering-4uzp2z9xa-elledev.vercel.app/`
-2. **Install as App (PWA)**:
-   - **iPad / iPhone (Safari)**: Tap the **Share** icon → Select **"Add to Home Screen"**.
-   - **Android / PC (Chrome)**: Tap the **3 Dots** menu → Select **"Install App"** or **"Add to Home Screen"**.
+> **Important**: The Staff Control Panel and Customer TV Display must run in the **same browser on the same computer** — e.g. one PC with the TV connected as an extended or mirrored second monitor. They sync via `BroadcastChannel`/`localStorage`, which only works within one browser instance, not across separate devices on the network.
+
+### **A. Setting Up the Staff Control Panel (PC)**
+1. On the PC driving both screens, open the Staff link: `https://queueordering-4uzp2z9xa-elledev.vercel.app/`
+2. **Install as App (PWA)** (optional): Chrome/Edge **3 Dots** menu → **"Install App"**.
 3. Use the numeric keypad to type an order number and press **"⏳ Add to Preparing"**.
 
-### **B. Setting Up the Customer TV Display (Waiting Area)**
-1. Open the TV link on your Smart TV browser (Samsung, LG, Android TV, Firestick, or HDMI PC):
+### **B. Setting Up the Customer TV Display (Extended/Mirrored Screen)**
+1. Connect the TV to the same PC as a second monitor (HDMI cable, wireless display adapter, or screen mirroring) and extend the desktop onto it.
+2. In the same browser, open a second window on the TV link:
    `https://queueordering-4uzp2z9xa-elledev.vercel.app/customer.html`
-2. Press **F11** or Fullscreen on the browser for a clean display board.
-3. Make sure TV volume is turned on for the ready chime audio.
+3. Drag that window onto the TV's screen and press **F11** for fullscreen.
+4. Make sure TV volume is turned on for the ready chime and voice announcement.
 
 ---
 
@@ -84,17 +86,20 @@ The **Queue Calling & Customer Display System** is a lightweight, high-performan
 ```
 ┌─────────────────────────────┐                  ┌─────────────────────────────┐
 │    Staff Control Panel      │                  │    Customer TV Display      │
-│  (index.html / Mobile PWA)  │                  │       (customer.html)       │
+│      (index.html)           │                  │       (customer.html)       │
+│   Browser Window / Tab 1    │                  │    Browser Window / Tab 2   │
 └──────────────┬──────────────┘                  └──────────────▲──────────────┘
                │                                                │
-               │ HTTP POST / Broadcast                          │ SSE / Storage Stream
+               │        Same browser, same computer             │
                ▼                                                │
 ┌───────────────────────────────────────────────────────────────┴─────────────┐
-│                Real-Time Communication Pipeline                             │
-│   • Network: Server-Sent Events (/events) via server.js                     │
-│   • Local Tab: BroadcastChannel ('queue_channel') + localStorage Sync       │
+│                    Client-Side Sync (No Backend)                            │
+│   • BroadcastChannel ('queue_channel') — instant cross-tab push             │
+│   • localStorage + 'storage' event — fallback / state persistence          │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+Because sync is entirely client-side, the app works flawlessly on Vercel's static hosting with no server component in production — `server.js` is only used for local development (`node server.js`).
 
 ### **Data Persistence Schema (`localStorage`)**
 - `queueState`: `{ preparing: [{ num, timeStr }], ready: [{ num, timeStr }] }`
